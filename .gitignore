@@ -1,0 +1,46 @@
+# Node.js (client)
+/client/node_modules
+/client/.pnp
+/client/pnp.*
+/client/yarn/*
+!/client/yarn/patches
+!/client/yarn/plugins
+!/client/yarn/releases
+!/client/yarn/versions
+/client/coverage
+/client/.next
+/client/out
+/client/build
+/client/.DS_Store
+/client/*.pem
+/client/npm-debug.log*
+/client/yarn-debug.log*
+/client/yarn-error.log*
+/client/.pnpm-debug.log*
+/client/.env*
+/client/.vercel
+/client/*.tsbuildinfo
+/client/next-env.d.ts
+
+# Maven (server)
+/server/target
+/server/.idea
+/server/.mvn
+/server/*.log
+/server/.DS_Store
+
+# Ignore server properties and env files
+/server/src/main/resources/application.properties
+/server/src/main/resources/application-*.properties
+/server/src/main/resources/.env*
+
+# General
+*.log
+*.pem
+.DS_Store
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
