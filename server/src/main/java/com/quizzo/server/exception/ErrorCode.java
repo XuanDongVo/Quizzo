@@ -8,6 +8,7 @@ public enum ErrorCode {
 
     // ===== VALIDATION =====
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error"),
+    INVALID_QUESTION_FORMAT(HttpStatus.BAD_REQUEST, "Invalid question format"),
 
     // ===== AUTH / SECURITY =====
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
@@ -22,6 +23,7 @@ public enum ErrorCode {
     // ===== BUSINESS =====
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     QUIZ_NOT_FOUND(HttpStatus.NOT_FOUND, "Quiz not found"),
+
 
     // ===== SYSTEM =====
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");

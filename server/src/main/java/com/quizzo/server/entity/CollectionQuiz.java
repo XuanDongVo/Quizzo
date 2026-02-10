@@ -8,18 +8,24 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "collection_quiz")
-public class CollectionQuiz  {
+@Table(
+        name = "collection_quiz",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"collection_id", "quiz_id"})
+        }
+)
+public class CollectionQuiz {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "collection_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "collection_id", nullable = false)
     private Collection collection;
 
-    @ManyToOne
-    @JoinColumn(name = "quiz_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 }
+

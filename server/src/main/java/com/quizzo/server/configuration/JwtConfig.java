@@ -3,21 +3,22 @@ package com.quizzo.server.configuration;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 import com.quizzo.server.service.JwtService;
+import com.quizzo.server.service.TokenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
     @Value("${jwt.base64-secret}")
     private String jwtKey;
+    private final TokenService tokenService;
 
     public SecretKey getSecretKey() {
         byte[] keyBytes = Base64.encode(jwtKey).decode();
@@ -34,7 +35,14 @@ public class JwtConfig {
         NimbusJwtDecoder jwtDecoder =NimbusJwtDecoder.withSecretKey(getSecretKey()).macAlgorithm(JwtService.JWT_ALGORITHM).build();
         return token -> {
             try {
-                return jwtDecoder.decode(token);
+                Jwt jwt =  jwtDecoder.decode(token);
+                String jwtId = jwt.getClaim("jwtId");
+
+                // Check blacklist access token
+                if(tokenService.isAccessTokenBlacklisted(jwtId)) {
+                    throw new JwtException("JWT token is blacklisted");
+                }
+                return jwt;
             } catch (Exception e) {
                 System.out.println("jwt error:" + e.getMessage());
                 throw e;

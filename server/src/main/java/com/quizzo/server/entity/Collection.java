@@ -1,5 +1,6 @@
 package com.quizzo.server.entity;
 
+import com.quizzo.server.utils.enums.CollectionType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -9,8 +10,8 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "collection")
-public class Collection  {
+@Table(name = "collections")
+public class Collection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -19,11 +20,16 @@ public class Collection  {
     @Column(nullable = false)
     private String name;
 
-    private Boolean visibility;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CollectionType type;
+
+    private boolean visibility;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     private Instant createdAt;
 }
+

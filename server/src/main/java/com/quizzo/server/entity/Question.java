@@ -35,6 +35,9 @@ public class Question {
     private Integer score;
     private Integer orderIndex;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FillBlankAnswer> fillBlankAnswers;
 }

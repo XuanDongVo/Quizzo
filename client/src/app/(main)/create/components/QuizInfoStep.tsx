@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { CATEGORIES } from "@/types/quiz/quiz-types"
+import { COLLECTIONS } from "@/types/quiz/quiz-types"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -127,48 +127,23 @@ export function QuizInfoStep() {
       {/* Category & Difficulty row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <Label className="text-sm font-semibold text-foreground">Category</Label>
+          <Label className="text-sm font-semibold text-foreground">Collection</Label>
           <Select
-            value={quizz.category}
-            onValueChange={(v) => dispatch(setField({ category: v }))}
+            value={quizz.collection}
+            onValueChange={(v) => dispatch(setField({ collection: v }))}
           >
             <SelectTrigger className="h-12 rounded-xl">
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder="Select collection" />
             </SelectTrigger>
             <SelectContent>
-              {CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
+              {COLLECTIONS.map((collection) => (
+                <SelectItem key={collection} value={collection}>
+                  {collection}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-
-        {/* <div className="flex flex-col gap-2">
-          <Label className="text-sm font-semibold text-foreground">Difficulty</Label>
-          <div className="flex gap-2">
-            {(["easy", "medium", "hard"] as const).map((level) => (
-              <button
-                key={level}
-                type="button"
-                onClick={() => dispatch({ type: "SET_FIELD", field: "difficulty", value: level })}
-                className={cn(
-                  "flex-1 rounded-xl py-3 text-sm font-medium capitalize transition-all",
-                  quizz.difficulty === level
-                    ? level === "easy"
-                      ? "bg-answer-b text-background shadow-md"
-                      : level === "medium"
-                        ? "bg-accent text-accent-foreground shadow-md"
-                        : "bg-destructive text-destructive-foreground shadow-md"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                )}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div> */}
       </div>
     </div>
   )

@@ -1,6 +1,5 @@
 package com.quizzo.server.configuration;
 
-import com.quizzo.server.filter.JwtAuthenticationFilter;
 import com.quizzo.server.service.UserDetailServiceCustomize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,15 +22,14 @@ import java.util.Arrays;
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class        SecurityConfig {
     private final UserDetailServiceCustomize userDetailsService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity res,  JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity res) throws Exception {
         res.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/v1/auth/*").permitAll().anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2ResourceServer(
                         oauth -> oauth.jwt(Customizer.withDefaults())
                 );

@@ -30,7 +30,7 @@ export interface QuizzData {
   title: string;
   description: string;
   coverImageUrl: string;
-  category: string;
+  collection: string;
   questions: Question[];
   isPublic: boolean;
   shuffleQuestions: boolean;
@@ -44,7 +44,7 @@ export const DEFAULT_QUIZZ: QuizzData = {
   title: "",
   description: "",
   coverImageUrl: "",
-  category: "",
+  collection: "",
   questions: [],
   isPublic: true,
   shuffleQuestions: false,
@@ -115,7 +115,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   "fill-blank": "Fill in the Blank",
 };
 
-export const CATEGORIES = [
+export const COLLECTIONS = [
   "General Knowledge",
   "Science",
   "Mathematics",

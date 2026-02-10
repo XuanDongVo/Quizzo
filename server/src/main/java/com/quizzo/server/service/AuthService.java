@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TokenService tokenService;
+    private final JwtDecoder jwtDecoder;
 
     public boolean isUsernameAvailable(String username) {
         return !userRepository.existsByUsername(username);
@@ -71,26 +73,27 @@ public class AuthService {
     public String refreshAccessToken(String refreshToken) {
         Jwt jwt;
         try {
-            jwt = jwtService.extractToken(refreshToken);
-        } catch (JwtException e) {
-            throw new AppException(ErrorCode.INVALID_TOKEN);
-        }
-
-        Instant expiresAt = jwt.getExpiresAt();
-        if (expiresAt == null || expiresAt.isBefore(Instant.now())) {
+            jwt = jwtDecoder.decode(refreshToken); // decode refresh token
+        } catch (JwtException ex) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
 
         String jwtId = jwt.getClaim("jwtId");
+
+        // 1. Check refresh token
         if (!tokenService.isRefreshTokenValid(jwtId)) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
+
+        // 2. Revoke refresh old token
+        tokenService.revokeRefreshToken(jwtId);
 
         User user = userRepository.findById(jwt.getSubject())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         return jwtService.generateAccessToken(user).getToken();
     }
+
 
 
     public void logout(String accessToken, String refreshToken, HttpServletResponse response) {
