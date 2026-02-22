@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginFormValues } from '@/features/auth/schemas/auth.schema'
 import FieldError from '@/features/auth/components/FieldError'
-import { useLoginMutation } from '@/stores/auth/auth.api'
+import { useLoginMutation } from '@/stores/api/auth.api'
 import { ApiResponse } from '@/types/api/base-response.type'
 
 export default function SignInLayout() {

@@ -27,6 +27,7 @@ export interface Question {
 }
 
 export interface QuizzData {
+  id?: string;
   title: string;
   description: string;
   coverImageUrl: string;
@@ -51,7 +52,6 @@ export const DEFAULT_QUIZZ: QuizzData = {
   isPublicQuestion: true,
   showResults: true,
   passingScore: 70,
-  status: "draft"
 };
 
 export function createQuestion(type: QuestionType, order: number): Question {
@@ -127,3 +127,26 @@ export const COLLECTIONS = [
   "Sports",
   "Entertainment",
 ];
+export interface QuizzInfoRequest {
+  id?: string 
+  name: string
+  description?: string
+  imageUrl?: string
+  collection?: string | null
+  visibilityQuiz: boolean
+  visibilityQuestion: boolean
+  shuffle: boolean
+  showResults: boolean
+}
+export interface QuizzInfoResponse {
+  quizzId: string
+  name: string
+  description?: string
+  imageUrl?: string
+  collectionName?: string
+  visibilityQuiz: boolean
+  visibilityQuestion: boolean
+  shuffle: boolean
+  showResults: boolean
+}
+

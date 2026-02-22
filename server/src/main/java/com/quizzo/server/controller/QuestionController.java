@@ -32,7 +32,7 @@ public class QuestionController {
         );
     }
 
-    @PostMapping("udpate-question")
+    @PostMapping("/udpate-question")
     public ResponseEntity<ApiResponse<List<CreateQuestionResponse>>> updateQuestion(
             @RequestBody CreateQuestionRequest request
     ) {
@@ -48,16 +48,16 @@ public class QuestionController {
         );
     }
 
-    @DeleteMapping("/delete-question")
-    public ResponseEntity<ApiResponse<Void>> deleteQuestion(@RequestParam String questionId) {
+    @DeleteMapping("/delete-question/{questionId}")
+    public ResponseEntity<ApiResponse<Void>> deleteQuestion(@PathVariable String questionId) {
         questionService.deleteQuestion(questionId);
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                .success(true)
-                .code("QUESTION_DELETED")
-                .message("Question delete successfully")
-                .data(null)
-                .build());
+                        .success(true)
+                        .code("QUESTION_DELETED")
+                        .message("Question delete successfully")
+                        .data(null)
+                        .build());
     }
 
 }

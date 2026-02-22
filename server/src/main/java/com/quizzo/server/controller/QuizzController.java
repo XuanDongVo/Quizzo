@@ -20,7 +20,6 @@ public class QuizzController {
             @Valid @RequestBody QuizzInfoRequest request
     ) {
         QuizzInfoResponse response = quizzService.createQuizzInfo(request);
-
         return ResponseEntity.ok(
                 ApiResponse.<QuizzInfoResponse>builder()
                         .success(true)
@@ -36,7 +35,6 @@ public class QuizzController {
             @Valid @RequestBody QuizzInfoRequest request
     ) {
         QuizzInfoResponse response = quizzService.updateQuizzInfo(quizzId, request);
-
         return ResponseEntity.ok(
                 ApiResponse.<QuizzInfoResponse>builder()
                         .success(true)
@@ -52,7 +50,6 @@ public class QuizzController {
             @Valid @RequestBody QuizzInfoRequest request
     ) {
         quizzService.deleteQuizz(quizzId);
-
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .success(true)

@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signupSchema, SignupFormValues } from '@/features/auth/schemas/auth.schema'
 import FieldError from '@/features/auth/components/FieldError'
-import { useRegisterMutation, useCheckUserNameAvailabilityQuery } from '@/stores/auth/auth.api'
+import { useRegisterMutation, useCheckUserNameAvailabilityQuery } from '@/stores/api/auth.api'
 import { useRouter } from 'next/dist/client/components/navigation'
 import { ApiResponse } from '@/types/api/base-response.type';
 

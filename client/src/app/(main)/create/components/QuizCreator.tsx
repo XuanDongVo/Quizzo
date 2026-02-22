@@ -19,16 +19,42 @@ import { QuizPreview } from "./QuizPreview"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Save } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useCreateQuizzMutation } from "@/stores/api/quizz.api"
 
 export function QuizCreator() {
   const dispatch = useDispatch()
 
-  // 🔥 LẤY STATE TỪ REDUX
   const quiz = useSelector(selectQuizz)
   const currentStep = useSelector(selectCurrentStep)
   const selectedQuestionId = useSelector(selectSelectedQuestionId)
 
+  const [createQuizz, sucess] = useCreateQuizzMutation(); 
+
   const totalSteps = 4
+
+  const handleNext = async () => {
+  // Nếu đang ở step 0 và chưa có quizId → tạo draft
+  if (currentStep === 0 && !quiz.quizId) {
+    try {
+      const res = await createDraft({
+        title: quiz.title,
+        description: quiz.description,
+      }).unwrap()
+
+      dispatch(setQuizId(res.data.quizzId))
+
+      dispatch(setCurrentStep(1))
+    } catch (error) {
+      console.error("Create draft failed", error)
+    }
+
+    return
+  }
+
+  // các step khác thì chỉ chuyển step
+  dispatch(setCurrentStep(Math.min(totalSteps - 1, currentStep + 1)))
+}
+
 
   const canGoNext = () => {
     switch (currentStep) {
