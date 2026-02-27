@@ -9,13 +9,13 @@ import {
 import { getQuestionStatus } from "@/utils/questionStatus";
 
 interface CreateQuizState {
-  quizz: QuizzData;
+  quizz: QuizzData | null;
   currentStep: number;
   selectedQuestionId: string | null;
 }
 
 const initialState: CreateQuizState = {
-  quizz: DEFAULT_QUIZZ,
+  quizz: null,
   currentStep: 0,
   selectedQuestionId: null,
 };
@@ -24,11 +24,17 @@ export const createQuizSlice = createSlice({
   name: "createQuiz",
   initialState,
   reducers: {
+    setQuizz: (state, action: PayloadAction<QuizzData>) => {
+      state.quizz = action.payload;
+    },
+
     setField: (state, action: PayloadAction<Partial<QuizzData>>) => {
+      if (!state.quizz) return;
       Object.assign(state.quizz, action.payload);
     },
 
     addQuestion: (state, action: PayloadAction<QuestionType>) => {
+      if (!state.quizz) return;
       const order = state.quizz.questions.length;
       state.quizz.questions.push(createQuestion(action.payload, order));
     },
@@ -37,6 +43,7 @@ export const createQuizSlice = createSlice({
       state,
       action: PayloadAction<{ questionId: string; updates: Partial<Question> }>,
     ) {
+      if (!state.quizz) return;
       const q = state.quizz.questions.find(
         (q) => q.id === action.payload.questionId,
       );
@@ -48,6 +55,7 @@ export const createQuizSlice = createSlice({
     },
 
     deleteQuestion: (state, action: PayloadAction<string>) => {
+      if (!state.quizz) return;
       state.quizz.questions = state.quizz.questions.filter(
         (q) => q.id !== action.payload,
       );
@@ -57,6 +65,7 @@ export const createQuizSlice = createSlice({
       state,
       action: PayloadAction<{ from: number; to: number }>,
     ) => {
+      if (!state.quizz) return;
       const { from, to } = action.payload;
       if (from == to) return;
       const questions = state.quizz.questions;
@@ -69,6 +78,7 @@ export const createQuizSlice = createSlice({
       state,
       action: PayloadAction<{ questionId: string; optionId: string }>,
     ) => {
+      if (!state.quizz) return;
       const question = state.quizz.questions.find(
         (q) => q.id === action.payload.questionId,
       );
@@ -88,6 +98,7 @@ export const createQuizSlice = createSlice({
         text: string;
       }>,
     ) => {
+      if (!state.quizz) return;
       const question = state.quizz.questions.find(
         (q) => q.id === action.payload.questionId,
       );
@@ -116,6 +127,7 @@ export const createQuizSlice = createSlice({
 });
 
 export const {
+  setQuizz,
   setField,
   addQuestion,
   updateQuestion,

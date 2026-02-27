@@ -76,19 +76,31 @@ public class AuthController {
     ) {
         LoginResponse loginResponse = authService.login(request);
 
+        ResponseCookie accessCookie = ResponseCookie.from(
+                        "accessToken",
+                        loginResponse.getAccessToken()
+                )
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite("Lax")
+                .build();
+
         ResponseCookie refreshCookie = ResponseCookie.from(
                         "refreshToken",
                         loginResponse.getRefreshToken()
                 )
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/v1/auth/refresh")
                 .maxAge(30 * 24 * 60 * 60)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .body(
                         ApiResponse.<LoginResponse>builder()
                                 .success(true)
@@ -97,7 +109,7 @@ public class AuthController {
                                 .data(
                                         LoginResponse.builder()
                                                 .userId(loginResponse.getUserId())
-                                                .accessToken(loginResponse.getAccessToken())
+//                                                .accessToken(loginResponse.getAccessToken())
                                                 .build()
                                 )
                                 .build()

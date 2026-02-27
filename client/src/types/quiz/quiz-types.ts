@@ -42,6 +42,7 @@ export interface QuizzData {
 }
 
 export const DEFAULT_QUIZZ: QuizzData = {
+  id: undefined,
   title: "",
   description: "",
   coverImageUrl: "",
@@ -127,9 +128,13 @@ export const COLLECTIONS = [
   "Sports",
   "Entertainment",
 ];
+
+export interface CreateQuizzRequest {
+  title: string;
+}
 export interface QuizzInfoRequest {
-  id?: string 
-  name: string
+  id: string 
+  title: string
   description?: string
   imageUrl?: string
   collection?: string | null
@@ -140,7 +145,7 @@ export interface QuizzInfoRequest {
 }
 export interface QuizzInfoResponse {
   quizzId: string
-  name: string
+  title: string
   description?: string
   imageUrl?: string
   collectionName?: string

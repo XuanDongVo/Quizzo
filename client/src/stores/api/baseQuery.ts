@@ -4,13 +4,6 @@ import { FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 export const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:8080/v1",
   credentials: "include",
-  prepareHeaders: (headers, { getState }) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
 });
 
 export const baseQueryWithReauth: BaseQueryFn<
@@ -18,28 +11,21 @@ export const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
+  if (result.error?.status === 401) {
+
     const refreshResult = await baseQuery(
       { url: "/auth/refresh", method: "POST" },
       api,
-      extraOptions,
+      extraOptions
     );
 
-    if (refreshResult.data) {
-      const { accessToken } = refreshResult.data as { accessToken: string };
-
-      localStorage.setItem("accessToken", accessToken);
-
+    if (!refreshResult.error) {
       result = await baseQuery(args, api, extraOptions);
     } else {
-      localStorage.removeItem("accessToken");
-      await baseQuery(
-        { url: "/auth/logout", method: "POST" },
-        api,
-        extraOptions
-      );
+      window.location.href = "/signin";
     }
   }
 

@@ -19,6 +19,7 @@ public interface QuestionMapper {
     Question toEntity (CreateQuestionRequest.QuestionRequest request);
 
     @Mapping(source = "id", target = "questionId")
+    @Mapping(source = "fillBlankAnswers", target = "blanks")
     CreateQuestionResponse toResponse(Question question);
 
     @Mapping(source = "id", target = "answerId")

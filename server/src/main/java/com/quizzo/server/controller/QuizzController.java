@@ -1,5 +1,6 @@
 package com.quizzo.server.controller;
 
+import com.quizzo.server.dto.request.quizz.CreateQuizzRequest;
 import com.quizzo.server.dto.request.quizz.QuizzInfoRequest;
 import com.quizzo.server.dto.response.ApiResponse;
 import com.quizzo.server.dto.response.quizz.QuizzInfoResponse;
@@ -17,9 +18,9 @@ public class QuizzController {
 
     @PostMapping("/create-quizz")
     public ResponseEntity<ApiResponse<QuizzInfoResponse>> createQuizz(
-            @Valid @RequestBody QuizzInfoRequest request
+            @Valid @RequestBody CreateQuizzRequest request
     ) {
-        QuizzInfoResponse response = quizzService.createQuizzInfo(request);
+        QuizzInfoResponse response = quizzService.createQuizz(request);
         return ResponseEntity.ok(
                 ApiResponse.<QuizzInfoResponse>builder()
                         .success(true)

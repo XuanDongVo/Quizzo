@@ -1,5 +1,6 @@
 package com.quizzo.server.service;
 
+import com.quizzo.server.dto.request.quizz.CreateQuizzRequest;
 import com.quizzo.server.dto.request.quizz.QuizzInfoRequest;
 import com.quizzo.server.dto.response.quizz.QuizzInfoResponse;
 import com.quizzo.server.entity.Collection;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -37,27 +39,34 @@ public class QuizzService {
         return user.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
-    @Transactional
-    public QuizzInfoResponse createQuizzInfo(QuizzInfoRequest request) {
+    public void getQuizzByIdForCreator(String quizzId){
         User creator = getCurrentUser();
-        Collection collection = null;
-        Quiz quiz = quizzMapper.toEntity(request);
+        Quiz quizz = quizzRepository.findById(quizzId).orElseThrow(() -> new AppException(ErrorCode.QUIZ_NOT_FOUND));
+
+        if (!creator.getId().equals(quizz.getCreator().getId())){
+            return;
+        }
+
+
+        return;
+
+    }
+
+    @Transactional
+    public QuizzInfoResponse createQuizz(CreateQuizzRequest request) {
+        User creator = getCurrentUser();
+        Quiz quiz = new Quiz();
+        quiz.setTitle(request.getTitle());
+        quiz.setCreator(creator);
+        quiz.setDescription("");
+        quiz.setVisibilityQuiz(true);
+        quiz.setShuffle(false);
+        quiz.setShowResults(true);
+        quiz.setShowResults(true);
         quiz.setCreator(creator);
         quiz = quizzRepository.save(quiz);
 
-        if (request.getCollection() != null) {
-            collection = collectionRepository
-                    .findByName(request.getCollection())
-                    .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
-
-            CollectionQuiz collectionQuiz = new CollectionQuiz();
-            collectionQuiz.setQuiz(quiz);
-            collectionQuiz.setCollection(collection);
-
-            collectionQuizzRepository.save(collectionQuiz);
-        }
-
-        return quizzMapper.toQuizzInfoResponse(quiz, collection);
+        return quizzMapper.toQuizzInfoResponse(quiz, null);
     }
 
     @Transactional

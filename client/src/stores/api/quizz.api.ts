@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./baseQuery";
-import { QuizzInfoRequest, QuizzInfoResponse } from "@/types/quiz/quiz-types";
+import { CreateQuizzRequest, QuizzInfoResponse, QuizzInfoRequest } from "@/types/quiz/quiz-types";
 import { ApiResponse } from "@/types/api/base-response.type";
 
 export const quizzApi = createApi({
@@ -10,7 +10,7 @@ export const quizzApi = createApi({
   endpoints: (builder) => ({
     createQuizz: builder.mutation<
       ApiResponse<QuizzInfoResponse>,
-      QuizzInfoRequest
+      CreateQuizzRequest
     >({
       query: (body) => ({
         url: "/quizz/create-quizz",

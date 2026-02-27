@@ -1,84 +1,88 @@
-"use client"
-import { useDispatch, useSelector } from "react-redux"
+"use client";
+import { useDispatch, useSelector } from "react-redux";
 import {
   selectQuizz,
   selectCurrentStep,
   selectSelectedQuestionId,
-} from "@/stores/create-quizz/createQuizz.selectors"
+} from "@/stores/create-quizz/createQuizz.selectors";
 import {
   setCurrentStep,
   setSelectedQuestion,
-} from "@/stores/create-quizz/createQuizz.slice"
+} from "@/stores/create-quizz/createQuizz.slice";
 
-import { QuizStepper } from "./QuizStepper"
-import { QuizInfoStep } from "./QuizInfoStep"
-import { QuestionBuilder } from "./QuestionBuilder"
-import { QuestionEditor } from "./QuestionEditor"
-import { QuizSettings } from "./QuizSettings"
-import { QuizPreview } from "./QuizPreview"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Save } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useCreateQuizzMutation } from "@/stores/api/quizz.api"
+import { QuizStepper } from "./QuizStepper";
+import { QuizInfoStep } from "./QuizInfoStep";
+import { QuestionBuilder } from "./QuestionBuilder";
+import { QuestionEditor } from "./QuestionEditor";
+import { QuizSettings } from "./QuizSettings";
+import { QuizPreview } from "./QuizPreview";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toastError } from "@/lib/toast";
+import { QuizzData } from "@/types/quiz/quiz-types";
 
-export function QuizCreator() {
-  const dispatch = useDispatch()
+export function QuizCreator({quiz}: {quiz: QuizzData}) {
+  const dispatch = useDispatch();
 
-  const quiz = useSelector(selectQuizz)
-  const currentStep = useSelector(selectCurrentStep)
-  const selectedQuestionId = useSelector(selectSelectedQuestionId)
+  
+  const currentStep = useSelector(selectCurrentStep);
+  const selectedQuestionId = useSelector(selectSelectedQuestionId);
+  const router = useRouter();
 
-  const [createQuizz, sucess] = useCreateQuizzMutation(); 
+  const totalSteps = 4;
 
-  const totalSteps = 4
+  useEffect(() => { 
+    if (!quiz) {
+      const timer = setTimeout(() => {
+        toastError("Not found quiz. Redirecting to library.");
+        router.push("/library");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [quiz, router]);
 
   const handleNext = async () => {
-  // Nếu đang ở step 0 và chưa có quizId → tạo draft
-  if (currentStep === 0 && !quiz.quizId) {
-    try {
-      const res = await createDraft({
-        title: quiz.title,
-        description: quiz.description,
-      }).unwrap()
+    dispatch(setCurrentStep(currentStep + 1));
+  };
 
-      dispatch(setQuizId(res.data.quizzId))
-
-      dispatch(setCurrentStep(1))
-    } catch (error) {
-      console.error("Create draft failed", error)
-    }
-
-    return
+  if (!quiz) {
+    return <LoadingSpinner fullPage={true} />;
   }
-
-  // các step khác thì chỉ chuyển step
-  dispatch(setCurrentStep(Math.min(totalSteps - 1, currentStep + 1)))
-}
-
 
   const canGoNext = () => {
     switch (currentStep) {
       case 0:
-        return quiz.title.trim().length > 0
-      case 1:
-        return quiz.questions.length > 0
+        return quiz.title.trim().length > 0;
+      // case 1:
+      //   return quiz.questions.length > 0
       default:
-        return true
+        return true;
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar */}
       <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
-          <h1 className="text-lg font-bold font-display text-foreground">Create Quiz</h1>
+          <h1 className="text-lg font-bold font-display text-foreground">
+            Create Quiz
+          </h1>
           <div className="flex items-center gap-2">
             <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-answer-b animate-pulse" />
               Auto-saved
             </span>
-            <Button variant="outline" size="sm" className="rounded-lg gap-1.5 bg-transparent">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg gap-1.5 bg-transparent"
+            >
               <Save className="h-3.5 w-3.5" />
               <span className="hidden md:inline">Save Draft</span>
             </Button>
@@ -106,7 +110,7 @@ export function QuizCreator() {
             <div
               className={cn(
                 "w-full md:w-[360px] md:shrink-0 flex flex-col",
-                selectedQuestionId ? "hidden md:flex" : "flex"
+                selectedQuestionId ? "hidden md:flex" : "flex",
               )}
             >
               <QuestionBuilder />
@@ -116,7 +120,9 @@ export function QuizCreator() {
             <div
               className={cn(
                 "flex-1 min-w-0",
-                selectedQuestionId ? "flex flex-col" : "hidden md:flex md:flex-col"
+                selectedQuestionId
+                  ? "flex flex-col"
+                  : "hidden md:flex md:flex-col",
               )}
             >
               <div className="rounded-2xl border border-border bg-card p-4 md:p-6">
@@ -138,9 +144,9 @@ export function QuizCreator() {
             variant="outline"
             onClick={() => {
               if (currentStep === 1 && selectedQuestionId) {
-                dispatch(setSelectedQuestion(null))
+                dispatch(setSelectedQuestion(null));
               } else {
-                dispatch(setCurrentStep(Math.max(0, currentStep - 1)))
+                dispatch(setCurrentStep(Math.max(0, currentStep - 1)));
               }
             }}
             disabled={currentStep === 0 && !selectedQuestionId}
@@ -156,7 +162,7 @@ export function QuizCreator() {
                 key={`step-dot-${i}`}
                 className={cn(
                   "h-1.5 rounded-full transition-all md:hidden",
-                  i === currentStep ? "w-6 bg-primary" : "w-1.5 bg-border"
+                  i === currentStep ? "w-6 bg-primary" : "w-1.5 bg-border",
                 )}
               />
             ))}
@@ -164,7 +170,7 @@ export function QuizCreator() {
 
           {currentStep < totalSteps - 1 ? (
             <Button
-              onClick={() => dispatch(setCurrentStep(Math.min(totalSteps - 1, currentStep + 1)))}
+              onClick={() => handleNext()}
               disabled={!canGoNext()}
               className="rounded-xl gap-1.5"
             >
@@ -172,12 +178,10 @@ export function QuizCreator() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
-            <Button className="rounded-xl gap-1.5 font-bold">
-              Publish
-            </Button>
+            <Button className="rounded-xl gap-1.5 font-bold">Publish</Button>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

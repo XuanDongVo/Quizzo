@@ -14,7 +14,11 @@ export const store = configureStore({
     createQuizz: createQuizSlice,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware),
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      quizzApi.middleware,
+      questionApi.middleware
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class QuizzInfoRequest {
+
     @NotBlank
     private String title;
     private String description;

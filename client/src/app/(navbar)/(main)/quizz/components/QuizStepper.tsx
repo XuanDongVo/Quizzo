@@ -20,7 +20,7 @@ interface QuizStepperProps {
 export function QuizStepper({ currentStep, onStepClick, canGoNext, questionCount }: QuizStepperProps) {
 
   const handleStepclick = (step: number) => {
-    if (step < currentStep || (step === currentStep) || (step === currentStep + 1 && canGoNext())) {
+    if (canGoNext()) {
       onStepClick(step)
     }
   }
