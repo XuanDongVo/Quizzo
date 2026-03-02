@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class CreateAnswerRequest {
+    private String clientTempId;
     private String answerId;
     @NotBlank
     private String content;

@@ -1,42 +1,35 @@
 import { QuestionType } from "./quiz-types"
 
-// Create Answer Request
-export interface CreateAnswerRequest {
-  answerId?: string
-  content: string
-  isCorrect?: boolean
+export interface CreateQuestionRequest {
+  quizId: string
+  questionRequest: QuestionRequest[]
 }
 
-// Fill Blank Answer Request
-export interface FillBlankAnswerRequest {
-  answerId?: string
-  blankIndex: number
-  acceptedAnswers: string
-}
-
-// Question Request
 export interface QuestionRequest {
   questionId?: string
+  clientTempId?: string
   questionType: QuestionType
   content: string
   timeLimit?: number
   score?: number
   orderIndex?: number
-
-  // image, audio, video
   url?: string
-
-  // choice
   answers?: CreateAnswerRequest[]
-
-  // fill blank
   blanks?: FillBlankAnswerRequest[]
 }
 
-// Create Question Request
-export interface CreateQuestionRequest {
-  quizId: string
-  questionRequest: QuestionRequest[]
+export interface CreateAnswerRequest {
+  clientTempId?: string
+  answerId?: string
+  content: string
+  isCorrect?: boolean
+}
+
+export interface FillBlankAnswerRequest {
+  clientTempId?: string
+  answerId?: string
+  blankIndex: number
+  acceptedAnswers: string
 }
 
 // Answer Response
@@ -54,7 +47,7 @@ export interface FillBlankAnswerResponse {
 }
 
 // Create Question Response
-export interface CreateQuestionResponse {
+export interface QuestionResponse {
   questionId: string
   content: string
 
@@ -68,3 +61,23 @@ export interface CreateQuestionResponse {
   blanks?: FillBlankAnswerResponse[]
 }
 
+// Upsert Answer Response (mapping tempId -> realId)
+export interface UpsertAnswerResponse {
+  clientTempId?: string
+  answerId: string
+}
+
+// Upsert Fill Blank Response
+export interface UpsertFillBlankResponse {
+  clientTempId?: string
+  answerId: string
+}
+
+// Upsert Question Response
+export interface UpsertQuestionResponse {
+  clientTempId?: string
+  questionId: string
+
+  answers?: UpsertAnswerResponse[]
+  blanks?: UpsertFillBlankResponse[]
+}

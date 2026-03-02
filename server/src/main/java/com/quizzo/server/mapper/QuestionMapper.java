@@ -2,6 +2,7 @@ package com.quizzo.server.mapper;
 
 import com.quizzo.server.dto.request.quizz.CreateQuestionRequest;
 import com.quizzo.server.dto.response.quizz.CreateQuestionResponse;
+import com.quizzo.server.dto.response.quizz.QuestionResponse;
 import com.quizzo.server.entity.Answer;
 import com.quizzo.server.entity.FillBlankAnswer;
 import com.quizzo.server.entity.Question;
@@ -20,14 +21,16 @@ public interface QuestionMapper {
 
     @Mapping(source = "id", target = "questionId")
     @Mapping(source = "fillBlankAnswers", target = "blanks")
-    CreateQuestionResponse toResponse(Question question);
+    QuestionResponse toResponse(Question question);
+
+
 
     @Mapping(source = "id", target = "answerId")
     CreateQuestionResponse.AnswerResponse toAnswerResponse(Answer answer);
 
-    @Mapping(source = "id", target = "answerId")
-    @Mapping(source = "answerText", target = "acceptedAnswers")
-    CreateQuestionResponse.FillBlankAnswerResponse toFillBlankResponse(FillBlankAnswer entity);
+//    @Mapping(source = "id", target = "answerId")
+//    @Mapping(source = "answerText", target = "acceptedAnswers")
+//    CreateQuestionResponse.FillBlankAnswerResponse toFillBlankResponse(FillBlankAnswer entity);
 
 
     List<CreateQuestionResponse.AnswerResponse> toAnswerResponses(List<Answer> answers);

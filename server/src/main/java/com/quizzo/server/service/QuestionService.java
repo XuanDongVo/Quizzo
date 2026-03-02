@@ -4,6 +4,7 @@ import com.quizzo.server.dto.request.quizz.CreateAnswerRequest;
 import com.quizzo.server.dto.request.quizz.CreateQuestionRequest;
 import com.quizzo.server.dto.request.quizz.FillBlankAnswerRequest;
 import com.quizzo.server.dto.response.quizz.CreateQuestionResponse;
+import com.quizzo.server.dto.response.quizz.QuestionResponse;
 import com.quizzo.server.entity.Answer;
 import com.quizzo.server.entity.FillBlankAnswer;
 import com.quizzo.server.entity.Question;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -31,66 +33,63 @@ public class QuestionService {
     private final AnswerRepository answerRepository;
 
     @Transactional
-    public List<CreateQuestionResponse> createQuestionForQuizz(CreateQuestionRequest request) {
-        Quiz quiz = quizzRepository.findById(request.getQuizId())
+    public List<CreateQuestionResponse> upsertQuestion(CreateQuestionRequest questionRequest) {
+        Quiz quiz = quizzRepository.findById(questionRequest.getQuizId())
                 .orElseThrow(() -> new AppException(ErrorCode.QUIZ_NOT_FOUND));
 
-        return request.getQuestionRequest().stream().map(qReq -> {
+        return questionRequest.getQuestionRequest().stream().map(qReq -> {
+            validateQuestionRequest(qReq);
 
-             validateQuestionRequest(qReq);
+            Question question;
+            boolean isCreate = qReq.getQuestionId() == null;
 
-            Question question = questionMapper.toEntity(qReq);
-            question.setQuiz(quiz);
+            if (isCreate) {
+                question = questionMapper.toEntity(qReq);
+                question.setQuiz(quiz);
+            } else {
+                question = questionRepository.findById(qReq.getQuestionId())
+                        .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
+
+                // update fields
+                question.setContent(qReq.getContent());
+                question.setTimeLimit(qReq.getTimeLimit());
+                question.setScore(qReq.getScore());
+                question.setOrderIndex(qReq.getOrderIndex());
+            }
 
             if (qReq.getUrl() != null) {
                 question.setImageUrl(qReq.getUrl());
             }
-
             question = questionRepository.save(question);
 
-            CreateQuestionResponse response = questionMapper.toResponse(question);
+            CreateQuestionResponse response =
+                    CreateQuestionResponse.builder()
+                            .clientTempId(isCreate ? qReq.getClientTempId() : null)
+                            .questionId(question.getId()).build();
 
             switch (qReq.getQuestionType()) {
-                case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
-                    List<Answer> answers = saveChoiceAnswers(question, qReq.getAnswers(), false);
-                    response.setAnswers(questionMapper.toAnswerResponses(answers));
-                }
-                case FILL_BLANK -> {
-                    List<FillBlankAnswer> blanks = saveFillBlankAnswers(question, qReq.getBlanks(), false);
-                    response.setBlanks(questionMapper.toFillBlankResponses(blanks));
+            case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
+                List<CreateQuestionResponse.AnswerResponse> answerMappings =
+                        upsertChoiceAnswers(question, qReq.getAnswers());
+
+                if (!answerMappings.isEmpty()) {
+                    response.setAnswers(answerMappings);
                 }
             }
 
-            return response;
-        }).toList();
-    }
+            case FILL_BLANK -> {
+                List<CreateQuestionResponse.FillBlankAnswerResponse> blankMappings =
+                        upsertFillBlankAnswers(question, qReq.getBlanks());
 
-
-    @Transactional
-    public List<CreateQuestionResponse> updateQuestion(CreateQuestionRequest request) {
-        return request.getQuestionRequest().stream().map(qReq -> {
-
-            validateQuestionRequest(qReq);
-
-            Question question = questionRepository.findById(qReq.getQuestionId())
-                    .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
-
-            CreateQuestionResponse response = questionMapper.toResponse(question);
-
-            switch (qReq.getQuestionType()) {
-                case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
-                    List<Answer> answers = saveChoiceAnswers(question, qReq.getAnswers(), true);
-                    response.setAnswers(questionMapper.toAnswerResponses(answers));
-                }
-                case FILL_BLANK -> {
-                    List<FillBlankAnswer> blanks = saveFillBlankAnswers(question, qReq.getBlanks(), true);
-                    response.setBlanks(questionMapper.toFillBlankResponses(blanks));
+                if (!blankMappings.isEmpty()) {
+                    response.setBlanks(blankMappings);
                 }
             }
-            return response;
-        }).toList();
-    }
+        }
+        return response;
+    }).toList();
 
+    }
 
     public void deleteQuestion(String questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new AppException(ErrorCode.QUIZ_NOT_FOUND));
@@ -116,47 +115,69 @@ public class QuestionService {
         }
     }
 
-    private List<Answer> saveChoiceAnswers(
+    private List<CreateQuestionResponse.AnswerResponse> upsertChoiceAnswers(
             Question question,
-            List<CreateAnswerRequest> answers,
-            boolean isUpdate
+            List<CreateAnswerRequest> answers
     ) {
         return answers.stream().map(a -> {
+            boolean isCreate = a.getAnswerId() == null;
+            Answer answer;
 
-            Answer answer = isUpdate
-                    ? answerRepository.findById(a.getAnswerId())
-                    .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN))
-                    : new Answer();
+            if (isCreate) {
+                answer = new Answer();
+                answer.setQuestion(question);
+            } else {
+                answer = answerRepository.findById(a.getAnswerId()).orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
+            }
 
-            answer.setQuestion(question);
             answer.setContent(a.getContent());
             answer.setIsCorrect(Boolean.TRUE.equals(a.getIsCorrect()));
 
-            return answerRepository.save(answer);
+            answer = answerRepository.save(answer);
+            if (isCreate) {
+                return CreateQuestionResponse.AnswerResponse.builder()
+                        .clientTempId(a.getAnswerId())
+                        .answerId(answer.getId())
+                        .build();
+            }
 
-        }).toList();
+            return null;
+
+        }).filter(mapping -> mapping != null).toList();
     }
 
 
-    private List<FillBlankAnswer> saveFillBlankAnswers(
+    private List<CreateQuestionResponse.FillBlankAnswerResponse> upsertFillBlankAnswers(
             Question question,
-            List<FillBlankAnswerRequest> blanks,
-            boolean isUpdate
+            List<FillBlankAnswerRequest> blanks
     ) {
         return blanks.stream().map(b -> {
+            boolean isCreate = b.getAnswerId() == null;
 
-            FillBlankAnswer entity = isUpdate
-                    ? fillBlankAnswerRepository.findById(b.getAnswerId())
-                    .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN))
-                    : new FillBlankAnswer();
+            FillBlankAnswer entity;
 
-            entity.setQuestion(question);
+            if (isCreate) {
+                entity = new FillBlankAnswer();
+                entity.setQuestion(question);
+            } else {
+                entity = fillBlankAnswerRepository.findById(b.getAnswerId())
+                        .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
+            }
+
             entity.setBlankIndex(b.getBlankIndex());
             entity.setAnswerText(b.getAcceptedAnswers().trim());
 
-            return fillBlankAnswerRepository.save(entity);
+            entity = fillBlankAnswerRepository.save(entity);
 
-        }).toList();
+
+            if (isCreate) {
+                return CreateQuestionResponse.FillBlankAnswerResponse.builder()
+                        .clientTempId(b.getAnswerId())
+                        .answerId(entity.getId())
+                        .build();
+            }
+
+            return null;
+        }).filter(Objects::nonNull).toList();
     }
-
 }

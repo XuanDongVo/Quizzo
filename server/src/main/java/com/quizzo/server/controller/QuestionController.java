@@ -3,6 +3,7 @@ package com.quizzo.server.controller;
 import com.quizzo.server.dto.request.quizz.CreateQuestionRequest;
 import com.quizzo.server.dto.response.ApiResponse;
 import com.quizzo.server.dto.response.quizz.CreateQuestionResponse;
+import com.quizzo.server.dto.response.quizz.QuestionResponse;
 import com.quizzo.server.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,37 +17,24 @@ import java.util.List;
 public class QuestionController {
     private final QuestionService questionService;
 
-    @PostMapping("/add-question")
-    public ResponseEntity<ApiResponse<List<CreateQuestionResponse>>> addQuestion(
+    @PostMapping("/upsert-question")
+    public ResponseEntity<ApiResponse<List<CreateQuestionResponse>>> upsertQuestion(
             @RequestBody CreateQuestionRequest request
     ) {
-        List<CreateQuestionResponse> question = questionService.createQuestionForQuizz(request);
+
+        List<CreateQuestionResponse> questions =
+                questionService.upsertQuestion(request);
 
         return ResponseEntity.ok(
                 ApiResponse.<List<CreateQuestionResponse>>builder()
                         .success(true)
-                        .code("QUESTION_CREATED")
-                        .message("Question created successfully")
-                        .data(question)
+                        .code("QUESTION_SYNCED")
+                        .message("Questions synced successfully")
+                        .data(questions)
                         .build()
         );
     }
 
-    @PostMapping("/udpate-question")
-    public ResponseEntity<ApiResponse<List<CreateQuestionResponse>>> updateQuestion(
-            @RequestBody CreateQuestionRequest request
-    ) {
-        List<CreateQuestionResponse> question = questionService.updateQuestion(request);
-
-        return ResponseEntity.ok(
-                ApiResponse.<List<CreateQuestionResponse>>builder()
-                        .success(true)
-                        .code("QUESTION_UPDATE")
-                        .message("Questions updated successfully")
-                        .data(question)
-                        .build()
-        );
-    }
 
     @DeleteMapping("/delete-question/{questionId}")
     public ResponseEntity<ApiResponse<Void>> deleteQuestion(@PathVariable String questionId) {

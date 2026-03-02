@@ -16,6 +16,7 @@ public class CreateQuestionRequest {
     @Getter
     public static class QuestionRequest {
         private String questionId;
+        private String clientTempId;
         @NotNull
         private QuestionType questionType;
 

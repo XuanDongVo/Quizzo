@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 public class FillBlankAnswerRequest {
+    private String clientTempId;
     private String answerId;
 
     @NotNull

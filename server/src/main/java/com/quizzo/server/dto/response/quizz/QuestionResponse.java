@@ -9,10 +9,17 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class CreateQuestionResponse {
-    private String clientTempId;
+public class QuestionResponse {
     private String questionId;
+    private String content;
 
+    private Integer timeLimit;
+    private Integer score;
+    private Integer orderIndex;
+
+    private String imageUrl;
+
+    // choice questions
     private List<CreateQuestionResponse.AnswerResponse> answers;
 
     // fill blank
@@ -21,9 +28,11 @@ public class CreateQuestionResponse {
     @Builder
     @Getter
     @Setter
-    public  static class AnswerResponse {
+    public static class AnswerResponse {
         private String clientTempId;
         private String answerId;
+        private String content;
+        private Boolean isCorrect;
     }
 
     @Builder
@@ -32,6 +41,9 @@ public class CreateQuestionResponse {
     public static class FillBlankAnswerResponse {
         private String clientTempId;
         private String answerId;
+        private Integer blankIndex;
+        private String acceptedAnswers;
     }
 }
+
 

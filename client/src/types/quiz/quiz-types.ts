@@ -14,6 +14,7 @@ export interface AnswerOption {
 
 export interface Question {
   id: string;
+  serverId?: string;
   type: QuestionType;
   text: string;
   imageUrl?: string;
@@ -60,6 +61,7 @@ export function createQuestion(type: QuestionType, order: number): Question {
 
   const base = {
     id,
+    serverId: undefined,
     type,
     text: "",
     timeLimit: 30,
