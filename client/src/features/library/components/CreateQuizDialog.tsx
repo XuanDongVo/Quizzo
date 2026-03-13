@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useCreateQuizzMutation } from "@/stores/api/quizz.api";
+import { useCreateQuizzMutation } from "../../../service/quizz.api";
 import { useDispatch } from "react-redux";
-import { setQuizz } from "@/stores/create-quizz/createQuizz.slice";
-import { mapQuizzResponseToState } from "@/features/quizz/mapper/quizz.mapper";
+import { setQuizz } from "@/features/quizz/create-quizz/createQuizz.slice";
+import { mapQuizzInfoResponseToState } from "@/features/quizz/mapper/quizz.mapper";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -29,7 +29,7 @@ const handleCreate = async () => {
 
   try {
     const res = await createQuizz({ title }).unwrap();
-    const quizzMapper = mapQuizzResponseToState(res.data);
+    const quizzMapper = mapQuizzInfoResponseToState(res.data);
     
     dispatch(setQuizz(quizzMapper));
 

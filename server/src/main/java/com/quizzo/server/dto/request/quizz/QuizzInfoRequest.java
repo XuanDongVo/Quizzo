@@ -10,7 +10,7 @@ public class QuizzInfoRequest {
     private String title;
     private String description;
     private String imageUrl;
-    private String collection;
+    private String collectionId;
     private boolean visibilityQuiz;
     private boolean visibilityQuestion;
     private boolean shuffle;

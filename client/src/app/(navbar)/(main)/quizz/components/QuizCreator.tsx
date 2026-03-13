@@ -4,11 +4,11 @@ import {
   selectQuizz,
   selectCurrentStep,
   selectSelectedQuestionId,
-} from "@/stores/create-quizz/createQuizz.selectors";
+} from "@/features/quizz/create-quizz/createQuizz.selectors";
 import {
   setCurrentStep,
   setSelectedQuestion,
-} from "@/stores/create-quizz/createQuizz.slice";
+} from "@/features/quizz/create-quizz/createQuizz.slice";
 
 import { QuizStepper } from "./QuizStepper";
 import { QuizInfoStep } from "./QuizInfoStep";
@@ -25,18 +25,17 @@ import { useEffect } from "react";
 import { toastError } from "@/lib/toast";
 import { QuizzData } from "@/types/quiz/quiz-types";
 
-export function QuizCreator({quiz}: {quiz: QuizzData}) {
+export function QuizCreator({ quizz }: { quizz: QuizzData }) {
   const dispatch = useDispatch();
 
-  
   const currentStep = useSelector(selectCurrentStep);
   const selectedQuestionId = useSelector(selectSelectedQuestionId);
   const router = useRouter();
 
   const totalSteps = 4;
 
-  useEffect(() => { 
-    if (!quiz) {
+  useEffect(() => {
+    if (!quizz) {
       const timer = setTimeout(() => {
         toastError("Not found quiz. Redirecting to library.");
         router.push("/library");
@@ -44,22 +43,22 @@ export function QuizCreator({quiz}: {quiz: QuizzData}) {
 
       return () => clearTimeout(timer);
     }
-  }, [quiz, router]);
+  }, [quizz, router]);
 
   const handleNext = async () => {
     dispatch(setCurrentStep(currentStep + 1));
   };
 
-  if (!quiz) {
+  if (!quizz) {
     return <LoadingSpinner fullPage={true} />;
   }
 
   const canGoNext = () => {
     switch (currentStep) {
       case 0:
-        return quiz.title.trim().length > 0;
+        return quizz.title.trim().length > 0;
       // case 1:
-      //   return quiz.questions.length > 0
+      //   return quizz.questions.length > 0
       default:
         return true;
     }
@@ -96,13 +95,13 @@ export function QuizCreator({quiz}: {quiz: QuizzData}) {
           currentStep={currentStep}
           onStepClick={(step) => dispatch(setCurrentStep(step))}
           canGoNext={canGoNext}
-          questionCount={quiz.questions.length}
+          questionCount={quizz.questions.length}
         />
       </div>
 
       {/* Main content area */}
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 pb-32 md:px-6">
-        {currentStep === 0 && <QuizInfoStep />}
+        {currentStep === 0 && <QuizInfoStep quizz={quizz} />}
 
         {currentStep === 1 && (
           <div className="flex gap-6">
@@ -132,9 +131,9 @@ export function QuizCreator({quiz}: {quiz: QuizzData}) {
           </div>
         )}
 
-        {currentStep === 2 && <QuizSettings />}
+        {currentStep === 2 && <QuizSettings quizz={quizz} />}
 
-        {currentStep === 3 && <QuizPreview />}
+        {currentStep === 3 && <QuizPreview quizz={quizz} />}
       </main>
 
       {/* Bottom navigation */}

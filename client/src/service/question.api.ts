@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauth } from "./baseQuery";
+import { baseQueryWithReauth } from "./apiConfig/baseQuery";
 import { ApiResponse } from "@/types/api/base-response.type";
 import {
   CreateQuestionRequest,
-  CreateQuestionResponse,
+  UpsertQuestionResponse,
 } from "@/types/quiz/question-type";
 
 export const questionApi = createApi({
@@ -13,7 +13,7 @@ export const questionApi = createApi({
   endpoints: (builder) => ({
 
     addQuestion: builder.mutation<
-      ApiResponse<CreateQuestionResponse[]>,
+      ApiResponse<UpsertQuestionResponse[]>,
       CreateQuestionRequest
     >({
       query: (body) => ({
@@ -25,11 +25,11 @@ export const questionApi = createApi({
     }),
 
     updateQuestion: builder.mutation<
-      ApiResponse<CreateQuestionResponse[]>,
+      ApiResponse<UpsertQuestionResponse[]>,
       CreateQuestionRequest
     >({
       query: (body) => ({
-        url: "/question/udpate-question", 
+        url: "/question/update-question", 
         method: "POST",
         body,
       }),

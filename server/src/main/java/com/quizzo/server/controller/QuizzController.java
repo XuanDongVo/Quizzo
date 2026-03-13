@@ -4,6 +4,7 @@ import com.quizzo.server.dto.request.quizz.CreateQuizzRequest;
 import com.quizzo.server.dto.request.quizz.QuizzInfoRequest;
 import com.quizzo.server.dto.response.ApiResponse;
 import com.quizzo.server.dto.response.quizz.QuizzInfoResponse;
+import com.quizzo.server.dto.response.quizz.QuizzResponse;
 import com.quizzo.server.service.QuizzService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class QuizzController {
     private final QuizzService quizzService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<QuizzResponse>> getQuizzById(
+            @PathVariable String id
+    ) {
+        QuizzResponse response = quizzService.getQuizzByIdForCreator(id);
+        return ResponseEntity.ok(
+                ApiResponse.<QuizzResponse>builder()
+                        .success(true)
+                        .data(response)
+                        .message("Get quiz successfully")
+                        .build()
+        );
+    }
 
     @PostMapping("/create-quizz")
     public ResponseEntity<ApiResponse<QuizzInfoResponse>> createQuizz(

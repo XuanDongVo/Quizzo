@@ -42,4 +42,7 @@ public class Quiz extends BaseEntity {
 
     @OneToMany(mappedBy = "quiz")
     private List<Question> questions;
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CollectionQuiz> collectionQuizzes;
 }

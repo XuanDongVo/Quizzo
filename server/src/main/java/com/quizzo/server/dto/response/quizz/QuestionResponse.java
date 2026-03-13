@@ -1,5 +1,6 @@
 package com.quizzo.server.dto.response.quizz;
 
+import com.quizzo.server.utils.enums.QuestionType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,9 @@ import java.util.List;
 @Setter
 public class QuestionResponse {
     private String questionId;
+    private String clientTempId;
     private String content;
+    private QuestionType questionType;
 
     private Integer timeLimit;
     private Integer score;
@@ -20,10 +23,10 @@ public class QuestionResponse {
     private String imageUrl;
 
     // choice questions
-    private List<CreateQuestionResponse.AnswerResponse> answers;
+    private List<UpsertQuestionResponse.AnswerResponse> answers;
 
     // fill blank
-    private List<CreateQuestionResponse.FillBlankAnswerResponse> blanks;
+    private List<UpsertQuestionResponse.FillBlankAnswerResponse> blanks;
 
     @Builder
     @Getter

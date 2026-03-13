@@ -12,7 +12,7 @@ import {
   LoginFormValues,
 } from "@/features/auth/schemas/auth.schema";
 import FieldError from "@/features/auth/components/FieldError";
-import { useLoginMutation } from "@/stores/api/auth.api";
+import { useLoginMutation } from "../../../service/apiConfig/auth.api";
 import { ApiResponse } from "@/types/api/base-response.type";
 import { useRouter } from "next/navigation";
 

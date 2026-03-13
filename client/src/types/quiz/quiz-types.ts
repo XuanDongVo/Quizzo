@@ -1,3 +1,6 @@
+import { CollectionResponse } from "../collection/collection-type";
+import { QuestionResponse } from "./question-type";
+
 export type QuestionStatus = "draft" | "complete";
 
 export type QuestionType =
@@ -7,32 +10,42 @@ export type QuestionType =
   | "fill-blank";
 
 export interface AnswerOption {
-  id: string;
-  text: string;
+  clientTempId: string;
+  serverId?: string;
+  content: string;
   isCorrect: boolean;
+}
+export interface FillBlankOption {
+  clientTempId: string;
+  serverId?: string;
+  blankIndex: number;
+  acceptedAnswers: string;
 }
 
 export interface Question {
-  id: string;
+  clientTempId: string;
   serverId?: string;
-  type: QuestionType;
-  text: string;
+  questionType: QuestionType;
+
+  content: string;
+  timeLimit: number;
+  score: number;
+  orderIndex: number;
+
   imageUrl?: string;
   audioUrl?: string;
-  options: AnswerOption[];
-  timeLimit: number;
-  points: number;
-  order: number;
+  answers?: AnswerOption[];
+  blanks?: FillBlankOption[];
+
   status: QuestionStatus;
-  syncStatus: "synced" | "dirty";
 }
 
 export interface QuizzData {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   coverImageUrl: string;
-  collection: string;
+  collectionResponse: CollectionResponse;
   questions: Question[];
   isPublic: boolean;
   shuffleQuestions: boolean;
@@ -43,11 +56,11 @@ export interface QuizzData {
 }
 
 export const DEFAULT_QUIZZ: QuizzData = {
-  id: undefined,
+  id: "",
   title: "",
   description: "",
   coverImageUrl: "",
-  collection: "",
+  collectionResponse: { id: "", name: "" },
   questions: [],
   isPublic: true,
   shuffleQuestions: false,
@@ -56,57 +69,72 @@ export const DEFAULT_QUIZZ: QuizzData = {
   passingScore: 70,
 };
 
-export function createQuestion(type: QuestionType, order: number): Question {
-  const id = crypto.randomUUID();
+export function createQuestion(
+  type: QuestionType,
+  orderIndex: number,
+): Question {
+  const tempId = crypto.randomUUID();
 
-  const base = {
-    id,
-    serverId: undefined,
-    type,
-    text: "",
+  const base: Question = {
+    clientTempId: tempId,
+    questionType: type,
+    content: "",
     timeLimit: 30,
-    points: 10,
-    order,
-    status: "draft" as const,
-    syncStatus: "dirty" as const,
+    score: 10,
+    orderIndex,
+    status: "draft",
   };
 
   switch (type) {
     case "single-choice":
       return {
         ...base,
-        options: [
-          { id: crypto.randomUUID(), text: "", isCorrect: true },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
+        answers: [
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: true },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
         ],
       };
 
     case "multiple-choice":
       return {
         ...base,
-        options: [
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
-          { id: crypto.randomUUID(), text: "", isCorrect: false },
+        answers: [
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
         ],
       };
 
     case "true-false":
       return {
         ...base,
-        options: [
-          { id: crypto.randomUUID(), text: "True", isCorrect: true },
-          { id: crypto.randomUUID(), text: "False", isCorrect: false },
+        answers: [
+          {
+            clientTempId: crypto.randomUUID(),
+            content: "True",
+            isCorrect: true,
+          },
+          {
+            clientTempId: crypto.randomUUID(),
+            content: "False",
+            isCorrect: false,
+          },
         ],
       };
 
     case "fill-blank":
       return {
         ...base,
-        options: [{ id: crypto.randomUUID(), text: "", isCorrect: true }],
+        blanks: [
+          {
+            clientTempId: crypto.randomUUID(),
+            blankIndex: 0,
+            acceptedAnswers: "",
+          },
+        ],
       };
   }
 }
@@ -135,25 +163,29 @@ export interface CreateQuizzRequest {
   title: string;
 }
 export interface QuizzInfoRequest {
-  id: string 
-  title: string
-  description?: string
-  imageUrl?: string
-  collection?: string | null
-  visibilityQuiz: boolean
-  visibilityQuestion: boolean
-  shuffle: boolean
-  showResults: boolean
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  collectionId?: string | null;
+  visibilityQuiz: boolean;
+  visibilityQuestion: boolean;
+  shuffle: boolean;
+  showResults: boolean;
 }
 export interface QuizzInfoResponse {
-  quizzId: string
-  title: string
-  description?: string
-  imageUrl?: string
-  collectionName?: string
-  visibilityQuiz: boolean
-  visibilityQuestion: boolean
-  shuffle: boolean
-  showResults: boolean
+  quizzId: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  collectionResponse?: CollectionResponse;
+  visibilityQuiz: boolean;
+  visibilityQuestion: boolean;
+  shuffle: boolean;
+  showResults: boolean;
 }
 
+export interface  QuizzResponse {
+  quizzInfoResponse: QuizzInfoResponse;
+  questions: QuestionResponse[];
+}

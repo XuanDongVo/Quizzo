@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { QUESTION_TYPE_LABELS } from "@/types/quiz/quiz-types"
+import { QUESTION_TYPE_LABELS, QuizzData } from "@/types/quiz/quiz-types"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -13,8 +13,6 @@ import {
   Trophy,
   AlertCircle,
 } from "lucide-react"
-import { selectQuizz } from "@/stores/create-quizz/createQuizz.selectors"
-import { useSelector, useDispatch } from "react-redux"
 
 const PREVIEW_ANSWER_COLORS = [
   "bg-answer-a text-background",
@@ -25,9 +23,7 @@ const PREVIEW_ANSWER_COLORS = [
 
 const ANSWER_LABELS = ["A", "B", "C", "D"]
 
-export function QuizPreview() {
-  const dispatch = useDispatch()
-  const quizz = useSelector(selectQuizz)
+export function QuizPreview({ quizz }: { quizz: QuizzData }) {
   const [previewIndex, setPreviewIndex] = useState(0)
 
   if (quizz.questions.length === 0) {
@@ -45,7 +41,7 @@ export function QuizPreview() {
   }
 
   const question = quizz.questions[previewIndex]
-  const totalPoints = quizz.questions.reduce((sum, q) => sum + q.points, 0)
+  const totalPoints = quizz.questions.reduce((sum, q) => sum + q.score, 0)
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -68,9 +64,9 @@ export function QuizPreview() {
             <p className="text-sm text-muted-foreground mt-1 text-pretty">{quizz.description}</p>
           )}
           <div className="flex flex-wrap items-center gap-3 mt-3">
-            {quizz.category && (
+            {quizz.collectionResponse && (
               <span className="inline-flex items-center rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                {quizz.category}
+                {quizz.collectionResponse.name}
               </span>
             )}
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -96,7 +92,7 @@ export function QuizPreview() {
               Question {previewIndex + 1}/{quizz.questions.length}
             </span>
             <span className="rounded-md bg-primary-foreground/20 px-2 py-0.5 text-xs font-medium text-primary-foreground">
-              {QUESTION_TYPE_LABELS[question.type]}
+              {QUESTION_TYPE_LABELS[question.questionType]}
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -106,7 +102,7 @@ export function QuizPreview() {
             </span>
             <span className="flex items-center gap-1 text-xs text-primary-foreground/80">
               <Zap className="h-3.5 w-3.5" />
-              {question.points}pts
+              {question.score}pts
             </span>
           </div>
         </div>
@@ -125,21 +121,21 @@ export function QuizPreview() {
 
           {/* Question text */}
           <h3 className="text-lg md:text-xl font-semibold text-foreground text-balance">
-            {question.text || "No question text"}
+            {question.content || "No question text"}
           </h3>
 
           {/* Answer options preview */}
-          {question.type === "fill-blank" ? (
+          {question.questionType === "fill-blank" ? (
             <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-4 text-center">
               <p className="text-sm text-muted-foreground">
-                Answer: <span className="font-semibold text-foreground">{question.options[0]?.text || "___"}</span>
+                Answer: <span className="font-semibold text-foreground">{question.blanks?.[0]?.acceptedAnswers || "___"}</span>
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {question.options.map((option, optIndex) => (
+              {question.answers?.map((option, optIndex) => (
                 <div
-                  key={option.id}
+                  key={option.clientTempId}
                   className={cn(
                     "flex items-center gap-3 rounded-xl p-3 md:p-4 transition-all",
                     PREVIEW_ANSWER_COLORS[optIndex % 4]
@@ -149,7 +145,7 @@ export function QuizPreview() {
                     {ANSWER_LABELS[optIndex]}
                   </span>
                   <span className="flex-1 text-sm font-medium">
-                    {option.text || `Option ${ANSWER_LABELS[optIndex]}`}
+                    {option.content || `Option ${ANSWER_LABELS[optIndex]}`}
                   </span>
                   {option.isCorrect && (
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-background/30">
@@ -177,7 +173,7 @@ export function QuizPreview() {
         <div className="flex gap-1.5">
           {quizz.questions.map((_, i) => (
             <button
-              key={quizz.questions[i].id}
+              key={quizz.questions[i].clientTempId}
               type="button"
               onClick={() => setPreviewIndex(i)}
               className={cn(

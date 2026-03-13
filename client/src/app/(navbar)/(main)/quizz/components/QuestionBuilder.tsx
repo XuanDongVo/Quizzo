@@ -6,11 +6,11 @@ import {
   deleteQuestion,
   reorderQuestions,
   setSelectedQuestion,
-} from "@/stores/create-quizz/createQuizz.slice"
+} from "@/features/quizz/create-quizz/createQuizz.slice"
 import {
   selectQuestions,
   selectSelectedQuestionId,
-} from "@/stores/create-quizz/createQuizz.selectors"
+} from "@/features/quizz/create-quizz/createQuizz.selectors"
 import { type QuestionType, QUESTION_TYPE_LABELS, QuestionStatus } from "@/types/quiz/quiz-types"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -113,13 +113,13 @@ export function QuestionBuilder() {
       ) : (
         <div className="flex flex-col gap-3">
           {questions.map((question, index) => {
-            const Icon = TYPE_ICONS[question.type]
-            const isSelected = selectedQuestionId === question.id
+            const Icon = TYPE_ICONS[question.questionType]
+            const isSelected = selectedQuestionId === question.clientTempId
             const status = question.status
             const StatusIcon = STATUS_STYLES[status].icon
             return (
               <div
-                key={question.id}
+                key={question.clientTempId}
                 draggable
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
@@ -137,13 +137,13 @@ export function QuestionBuilder() {
                   dragOverIndex === index && dragIndex !== index && "border-primary border-dashed bg-primary/5",
                   dragIndex === index && "opacity-50"
                 )}
-                onClick={() => dispatch(setSelectedQuestion(question.id))}
+                onClick={() => dispatch(setSelectedQuestion(question.clientTempId))}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault()
-                    dispatch(setSelectedQuestion(question.id))
+                    dispatch(setSelectedQuestion(question.clientTempId))
                   }
                 }}
               >
@@ -160,19 +160,19 @@ export function QuestionBuilder() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {question.text || "Untitled question"}
+                    {question.content || "Untitled question"}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium",
-                        TYPE_COLORS[question.type]
+                        TYPE_COLORS[question.questionType]
                       )}
                     >
                       <Icon className="h-3 w-3" />
-                      {QUESTION_TYPE_LABELS[question.type]}
+                      {QUESTION_TYPE_LABELS[question.questionType]}
                     </span>
-                    <span className="text-xs text-muted-foreground">{question.points}pts</span>
+                    <span className="text-xs text-muted-foreground">{question.score}pts</span>
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold",
@@ -190,8 +190,8 @@ export function QuestionBuilder() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    dispatch(deleteQuestion(question.id))
-                    if (selectedQuestionId === question.id) {
+                    dispatch(deleteQuestion(question.clientTempId))
+                    if (selectedQuestionId === question.clientTempId) {
                       dispatch(setSelectedQuestion(null))
                     }
                   }}

@@ -3,8 +3,7 @@ package com.quizzo.server.service;
 import com.quizzo.server.dto.request.quizz.CreateAnswerRequest;
 import com.quizzo.server.dto.request.quizz.CreateQuestionRequest;
 import com.quizzo.server.dto.request.quizz.FillBlankAnswerRequest;
-import com.quizzo.server.dto.response.quizz.CreateQuestionResponse;
-import com.quizzo.server.dto.response.quizz.QuestionResponse;
+import com.quizzo.server.dto.response.quizz.UpsertQuestionResponse;
 import com.quizzo.server.entity.Answer;
 import com.quizzo.server.entity.FillBlankAnswer;
 import com.quizzo.server.entity.Question;
@@ -33,7 +32,7 @@ public class QuestionService {
     private final AnswerRepository answerRepository;
 
     @Transactional
-    public List<CreateQuestionResponse> upsertQuestion(CreateQuestionRequest questionRequest) {
+    public List<UpsertQuestionResponse> upsertQuestion(CreateQuestionRequest questionRequest) {
         Quiz quiz = quizzRepository.findById(questionRequest.getQuizId())
                 .orElseThrow(() -> new AppException(ErrorCode.QUIZ_NOT_FOUND));
 
@@ -62,14 +61,14 @@ public class QuestionService {
             }
             question = questionRepository.save(question);
 
-            CreateQuestionResponse response =
-                    CreateQuestionResponse.builder()
+            UpsertQuestionResponse response =
+                    UpsertQuestionResponse.builder()
                             .clientTempId(isCreate ? qReq.getClientTempId() : null)
                             .questionId(question.getId()).build();
 
             switch (qReq.getQuestionType()) {
             case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
-                List<CreateQuestionResponse.AnswerResponse> answerMappings =
+                List<UpsertQuestionResponse.AnswerResponse> answerMappings =
                         upsertChoiceAnswers(question, qReq.getAnswers());
 
                 if (!answerMappings.isEmpty()) {
@@ -78,7 +77,7 @@ public class QuestionService {
             }
 
             case FILL_BLANK -> {
-                List<CreateQuestionResponse.FillBlankAnswerResponse> blankMappings =
+                List<UpsertQuestionResponse.FillBlankAnswerResponse> blankMappings =
                         upsertFillBlankAnswers(question, qReq.getBlanks());
 
                 if (!blankMappings.isEmpty()) {
@@ -115,7 +114,7 @@ public class QuestionService {
         }
     }
 
-    private List<CreateQuestionResponse.AnswerResponse> upsertChoiceAnswers(
+    private List<UpsertQuestionResponse.AnswerResponse> upsertChoiceAnswers(
             Question question,
             List<CreateAnswerRequest> answers
     ) {
@@ -135,7 +134,7 @@ public class QuestionService {
 
             answer = answerRepository.save(answer);
             if (isCreate) {
-                return CreateQuestionResponse.AnswerResponse.builder()
+                return UpsertQuestionResponse.AnswerResponse.builder()
                         .clientTempId(a.getAnswerId())
                         .answerId(answer.getId())
                         .build();
@@ -147,7 +146,7 @@ public class QuestionService {
     }
 
 
-    private List<CreateQuestionResponse.FillBlankAnswerResponse> upsertFillBlankAnswers(
+    private List<UpsertQuestionResponse.FillBlankAnswerResponse> upsertFillBlankAnswers(
             Question question,
             List<FillBlankAnswerRequest> blanks
     ) {
@@ -171,7 +170,7 @@ public class QuestionService {
 
 
             if (isCreate) {
-                return CreateQuestionResponse.FillBlankAnswerResponse.builder()
+                return UpsertQuestionResponse.FillBlankAnswerResponse.builder()
                         .clientTempId(b.getAnswerId())
                         .answerId(entity.getId())
                         .build();

@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Globe, Shuffle, BarChart3, Target } from "lucide-react"
-import { useDispatch, useSelector } from "react-redux"
-import { selectQuizz } from "@/stores/create-quizz/createQuizz.selectors"
-import { setField } from "@/stores/create-quizz/createQuizz.slice"
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Globe, Shuffle, BarChart3, Target } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setField } from "@/features/quizz/create-quizz/createQuizz.slice";
+import { QuizzData } from "@/types/quiz/quiz-types";
 
-export function QuizSettings() {
-  const dispatch = useDispatch()
-  const quiz = useSelector(selectQuizz)
+export function QuizSettings({ quizz }: { quizz: QuizzData }) {
+  const dispatch = useDispatch();
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-bold font-display text-foreground">Quiz Settings</h2>
+        <h2 className="text-lg font-bold font-display text-foreground">
+          Quiz Settings
+        </h2>
         <p className="text-sm text-muted-foreground">
           Configure how your quiz behaves when taken.
         </p>
@@ -29,12 +30,16 @@ export function QuizSettings() {
               <Globe className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <Label className="text-sm font-semibold text-foreground">Public Quiz</Label>
-              <p className="text-xs text-muted-foreground">Anyone with the link can take this quiz</p>
+              <Label className="text-sm font-semibold text-foreground">
+                Public Quiz
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Anyone with the link can take this quiz
+              </p>
             </div>
           </div>
           <Switch
-            checked={quiz.isPublic}
+            checked={quizz.isPublic}
             onCheckedChange={(v) => dispatch(setField({ isPublic: v }))}
           />
         </div>
@@ -46,12 +51,16 @@ export function QuizSettings() {
               <Shuffle className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <Label className="text-sm font-semibold text-foreground">Shuffle Questions</Label>
-              <p className="text-xs text-muted-foreground">Randomize the order of questions</p>
+              <Label className="text-sm font-semibold text-foreground">
+                Shuffle Questions
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Randomize the order of questions
+              </p>
             </div>
           </div>
           <Switch
-            checked={quiz.shuffleQuestions}
+            checked={quizz.shuffleQuestions}
             onCheckedChange={(v) => dispatch(setField({ shuffleQuestions: v }))}
           />
         </div>
@@ -63,12 +72,16 @@ export function QuizSettings() {
               <BarChart3 className="h-5 w-5 text-answer-b" />
             </div>
             <div>
-              <Label className="text-sm font-semibold text-foreground">Show Results</Label>
-              <p className="text-xs text-muted-foreground">Show correct answers after completion</p>
+              <Label className="text-sm font-semibold text-foreground">
+                Show Results
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Show correct answers after completion
+              </p>
             </div>
           </div>
           <Switch
-            checked={quiz.showResults}
+            checked={quizz.showResults}
             onCheckedChange={(v) => dispatch(setField({ showResults: v }))}
           />
         </div>
@@ -80,13 +93,19 @@ export function QuizSettings() {
               <Target className="h-5 w-5 text-answer-a" />
             </div>
             <div className="flex-1">
-              <Label className="text-sm font-semibold text-foreground">Passing Score</Label>
-              <p className="text-xs text-muted-foreground">Minimum score to pass the quiz</p>
+              <Label className="text-sm font-semibold text-foreground">
+                Passing Score
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Minimum score to pass the quiz
+              </p>
             </div>
-            <span className="text-lg font-bold text-primary">{quiz.passingScore}%</span>
+            <span className="text-lg font-bold text-primary">
+              {quizz.passingScore}%
+            </span>
           </div>
           <Slider
-            value={[quiz.passingScore]}
+            value={[quizz.passingScore]}
             onValueChange={([v]) => dispatch(setField({ passingScore: v }))}
             min={0}
             max={100}
@@ -100,5 +119,5 @@ export function QuizSettings() {
         </div>
       </div>
     </div>
-  )
+  );
 }

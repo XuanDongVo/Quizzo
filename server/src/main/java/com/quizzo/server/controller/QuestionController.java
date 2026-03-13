@@ -2,8 +2,7 @@ package com.quizzo.server.controller;
 
 import com.quizzo.server.dto.request.quizz.CreateQuestionRequest;
 import com.quizzo.server.dto.response.ApiResponse;
-import com.quizzo.server.dto.response.quizz.CreateQuestionResponse;
-import com.quizzo.server.dto.response.quizz.QuestionResponse;
+import com.quizzo.server.dto.response.quizz.UpsertQuestionResponse;
 import com.quizzo.server.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +17,15 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @PostMapping("/upsert-question")
-    public ResponseEntity<ApiResponse<List<CreateQuestionResponse>>> upsertQuestion(
+    public ResponseEntity<ApiResponse<List<UpsertQuestionResponse>>> upsertQuestion(
             @RequestBody CreateQuestionRequest request
     ) {
 
-        List<CreateQuestionResponse> questions =
+        List<UpsertQuestionResponse> questions =
                 questionService.upsertQuestion(request);
 
         return ResponseEntity.ok(
-                ApiResponse.<List<CreateQuestionResponse>>builder()
+                ApiResponse.<List<UpsertQuestionResponse>>builder()
                         .success(true)
                         .code("QUESTION_SYNCED")
                         .message("Questions synced successfully")

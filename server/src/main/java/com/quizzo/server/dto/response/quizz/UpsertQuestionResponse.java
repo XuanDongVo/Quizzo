@@ -9,14 +9,14 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class CreateQuestionResponse {
+public class UpsertQuestionResponse {
     private String clientTempId;
     private String questionId;
 
-    private List<CreateQuestionResponse.AnswerResponse> answers;
+    private List<UpsertQuestionResponse.AnswerResponse> answers;
 
     // fill blank
-    private List<CreateQuestionResponse.FillBlankAnswerResponse> blanks;
+    private List<UpsertQuestionResponse.FillBlankAnswerResponse> blanks;
 
     @Builder
     @Getter

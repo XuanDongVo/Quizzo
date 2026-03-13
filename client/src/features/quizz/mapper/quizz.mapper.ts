@@ -1,23 +1,7 @@
-import { QuizzData, QuizzInfoRequest, QuizzInfoResponse } from "@/types/quiz/quiz-types";
+import { QuestionStatus, QuestionType, QuizzData, QuizzInfoRequest, QuizzInfoResponse, QuizzResponse } from "@/types/quiz/quiz-types";
 
-// export const mapQuizzDataToRequest = (
-//   data: QuizzData
-// ): QuizzInfoRequest => {
-//   return {
-//     id: data.id,
-//     title: data.title,
-//     description: data.description,
-//     imageUrl: data.coverImageUrl,
-//     collection: data.collection,
 
-//     visibilityQuiz: data.isPublic,
-//     visibilityQuestion: data.isPublicQuestion,
-//     shuffle: data.shuffleQuestions,
-//     showResults: data.showResults,
-//   };
-// };
-
-export function mapQuizzResponseToState(
+export function mapQuizzInfoResponseToState(
   res: QuizzInfoResponse
 ): QuizzData {
   return {
@@ -25,7 +9,10 @@ export function mapQuizzResponseToState(
     title: res.title ?? "",
     description: res.description ?? "",
     coverImageUrl: res.imageUrl ?? "",
-    collection: res.collectionName ?? "",
+    collectionResponse: {
+      id: res.collectionResponse?.id ?? "",
+      name: res.collectionResponse?.name ?? "",
+    },
     isPublic: res.visibilityQuiz ?? true,
     isPublicQuestion: res.visibilityQuestion ?? true,
     shuffleQuestions: res.shuffle ?? false,
@@ -36,22 +23,59 @@ export function mapQuizzResponseToState(
   };
 }
 
-export const mapQuizzRequestToData = (
-  data: QuizzInfoRequest
-): QuizzData => {
+export function mapQuizzResponseToState(res: QuizzResponse): QuizzData {
   return {
-    id: data.id,
-    title: data.title,
-    description: data.description ?? "",
-    coverImageUrl: data.imageUrl ?? "",
-    collection: data.collection ?? "",
-    questions: [],
+    id: res.quizzInfoResponse.quizzId,
+    title: res.quizzInfoResponse.title,
+    description: res.quizzInfoResponse?.description || "",
+    coverImageUrl: res.quizzInfoResponse?.imageUrl || "",
 
-    isPublic: data.visibilityQuiz,
-    isPublicQuestion: data.visibilityQuestion,
-    shuffleQuestions: data.shuffle,
-    showResults: data.showResults,
+    collectionResponse: {
+      id: res.quizzInfoResponse.collectionResponse?.id ?? "",
+      name: res.quizzInfoResponse.collectionResponse?.name ?? "",
+    },
+
+    isPublic: res.quizzInfoResponse.visibilityQuiz ?? true,
+    isPublicQuestion: res.quizzInfoResponse.visibilityQuestion ?? true,
+    shuffleQuestions: res.quizzInfoResponse.shuffle ?? false,
+    showResults: res.quizzInfoResponse.showResults ?? true,
 
     passingScore: 70,
+
+    questions:
+      res.questions?.map((q, index) => ({
+        clientTempId: q.questionId, 
+        serverId: q.questionId,
+
+        questionType: q.questionType as QuestionType,
+
+        content: q.content,
+
+        timeLimit: q.timeLimit ?? 30,
+        score: q.score ?? 100,
+        orderIndex: q.orderIndex ?? index,
+
+        imageUrl: q.imageUrl,
+
+        answers: q.answers?.map((a) => ({
+          clientTempId: a.answerId, 
+          serverId: a.answerId,
+          content: a.content,
+          isCorrect: a.isCorrect,
+        })),
+
+        blanks: q.blanks?.map((b) => ({
+          clientTempId: b.answerId, 
+          serverId: b.answerId,
+          blankIndex: b.blankIndex,
+          acceptedAnswers: b.acceptedAnswers,
+        })),
+
+         status: "published" as QuestionStatus ,
+      })) ?? [],
+
+    status: "published",
   };
-};
+}
+     
+

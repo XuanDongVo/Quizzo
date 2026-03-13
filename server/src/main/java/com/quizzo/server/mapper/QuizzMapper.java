@@ -9,7 +9,7 @@
     import org.mapstruct.Mapping;
     import org.mapstruct.MappingTarget;
 
-    @Mapper(componentModel = "spring", uses = { QuestionMapper.class })
+    @Mapper(componentModel = "spring", uses = { QuestionMapper.class , CollectionMapper.class})
     public interface QuizzMapper {
 
         @Mapping(target = "id", ignore = true)
@@ -22,10 +22,11 @@
         );
 
         @Mapping(source = "quiz.id", target = "quizzId")
-        @Mapping(source = "collection.name", target = "collectionName")
+        @Mapping(source = "collection", target = "collectionResponse")
         QuizzInfoResponse toQuizzInfoResponse(Quiz quiz, Collection collection);
 
-        @Mapping(source = "quiz.questions", target = "questionResponses")
-        @Mapping(target = "quizzInfoResponse", expression = "java(toQuizzInfoResponse(quiz, collection))")
+        @Mapping(source = "quiz.questions", target = "questions")
+        @Mapping(target = "quizzInfoResponse",
+                expression = "java(toQuizzInfoResponse(quiz, collection))")
         QuizzResponse toQuizzResponse(Quiz quiz, Collection collection);
     }

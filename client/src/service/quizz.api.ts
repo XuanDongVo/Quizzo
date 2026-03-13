@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauth } from "./baseQuery";
-import { CreateQuizzRequest, QuizzInfoResponse, QuizzInfoRequest } from "@/types/quiz/quiz-types";
+import { baseQueryWithReauth } from "./apiConfig/baseQuery";
+import { CreateQuizzRequest, QuizzInfoResponse, QuizzInfoRequest, QuizzResponse } from "@/types/quiz/quiz-types";
 import { ApiResponse } from "@/types/api/base-response.type";
 
 export const quizzApi = createApi({
@@ -8,6 +8,11 @@ export const quizzApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Quizz"],
   endpoints: (builder) => ({
+    getQuizzById: builder.query<ApiResponse<QuizzResponse>, string>({
+      query: (id) => `/quizz/${id}`,
+      providesTags: (result, error, id) => [{ type: "Quizz", id }],
+    }),
+
     createQuizz: builder.mutation<
       ApiResponse<QuizzInfoResponse>,
       CreateQuizzRequest
@@ -43,6 +48,7 @@ export const quizzApi = createApi({
 });
 
 export const {
+  useGetQuizzByIdQuery,
   useCreateQuizzMutation,
   useUpdateQuizzMutation,
   useDeleteQuizzMutation,

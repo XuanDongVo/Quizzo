@@ -11,5 +11,5 @@ import java.util.List;
 @Builder
 public class QuizzResponse {
     private QuizzInfoResponse quizzInfoResponse;
-    private List<CreateQuestionResponse> questionResponses;
+    private List<QuestionResponse> questions;
 }

@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react"
-
-import { COLLECTIONS } from "@/types/quiz/quiz-types"
+import { COLLECTIONS, QuizzData } from "@/types/quiz/quiz-types"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -13,12 +12,11 @@ import { useCallback, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import {
   selectQuizz,
-} from "@/stores/create-quizz/createQuizz.selectors"
-import { setField } from "@/stores/create-quizz/createQuizz.slice"
-
-export function QuizInfoStep() {
+} from "@/features/quizz/create-quizz/createQuizz.selectors"
+import { setField } from "@/features/quizz/create-quizz/createQuizz.slice"
+  
+export function QuizInfoStep({quizz}: {quizz: QuizzData}) {
   const dispatch = useDispatch()
-  const quizz = useSelector(selectQuizz)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -65,7 +63,7 @@ export function QuizInfoStep() {
             quizz.coverImageUrl && "border-solid border-primary/30"
           )}
         >
-          {quizz.coverImageUrl ? (
+          {quizz?.coverImageUrl ? (
             <img
               src={quizz.coverImageUrl || "/placeholder.svg"}
               alt="Quiz cover"
@@ -82,7 +80,7 @@ export function QuizInfoStep() {
               </div>
             </div>
           )}
-          {quizz.coverImageUrl && (
+          {quizz?.coverImageUrl && (
             <div className="absolute inset-0 flex items-center justify-center bg-foreground/40 opacity-0 hover:opacity-100 transition-opacity">
               <p className="text-sm font-medium text-background">Change Image</p>
             </div>
@@ -106,7 +104,7 @@ export function QuizInfoStep() {
         <Input
           id="title"
           placeholder="Enter your quiz title..."
-          value={quizz.title}
+          value={quizz?.title}
           onChange={(e) => dispatch(setField({ title: e.target.value }))}
           className="h-12 rounded-xl text-base"
         />
@@ -118,18 +116,18 @@ export function QuizInfoStep() {
         <Textarea
           id="description"
           placeholder="Describe what this quiz is about..."
-          value={quizz.description}
+          value={quizz?.description}
           onChange={(e) => dispatch(setField({ description: e.target.value }))}
           className="min-h-[100px] rounded-xl text-base resize-none"
         />
       </div>
 
       {/* Category & Difficulty row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-semibold text-foreground">Collection</Label>
           <Select
-            value={quizz.collection}
+            value={quizz?.collection}
             onValueChange={(v) => dispatch(setField({ collection: v }))}
           >
             <SelectTrigger className="h-12 rounded-xl">
@@ -144,7 +142,7 @@ export function QuizInfoStep() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
