@@ -3,11 +3,15 @@ import { QuestionResponse } from "./question-type";
 
 export type QuestionStatus = "draft" | "complete";
 
+export const QUESTION_TYPES = {
+  SINGLE_CHOICE: "SINGLE_CHOICE",
+  MULTIPLE_CHOICE: "MULTIPLE_CHOICE",
+  TRUE_FALSE: "TRUE_FALSE",
+  FILL_BLANK: "FILL_BLANK",
+} as const;
+
 export type QuestionType =
-  | "single-choice"
-  | "multiple-choice"
-  | "true-false"
-  | "fill-blank";
+  (typeof QUESTION_TYPES)[keyof typeof QUESTION_TYPES];
 
 export interface AnswerOption {
   clientTempId: string;
@@ -45,7 +49,7 @@ export interface QuizzData {
   title: string;
   description: string;
   coverImageUrl: string;
-  collectionResponse: CollectionResponse;
+  collectionResponse?: CollectionResponse;
   questions: Question[];
   isPublic: boolean;
   shuffleQuestions: boolean;
@@ -60,7 +64,7 @@ export const DEFAULT_QUIZZ: QuizzData = {
   title: "",
   description: "",
   coverImageUrl: "",
-  collectionResponse: { id: "", name: "" },
+  collectionResponse: undefined,
   questions: [],
   isPublic: true,
   shuffleQuestions: false,
@@ -86,7 +90,7 @@ export function createQuestion(
   };
 
   switch (type) {
-    case "single-choice":
+    case "SINGLE_CHOICE":
       return {
         ...base,
         answers: [
@@ -97,7 +101,7 @@ export function createQuestion(
         ],
       };
 
-    case "multiple-choice":
+    case "MULTIPLE_CHOICE":
       return {
         ...base,
         answers: [
@@ -108,7 +112,7 @@ export function createQuestion(
         ],
       };
 
-    case "true-false":
+    case "TRUE_FALSE":
       return {
         ...base,
         answers: [
@@ -125,7 +129,7 @@ export function createQuestion(
         ],
       };
 
-    case "fill-blank":
+    case "FILL_BLANK":
       return {
         ...base,
         blanks: [
@@ -140,10 +144,10 @@ export function createQuestion(
 }
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  "single-choice": "Single Choice",
-  "multiple-choice": "Multiple Choice",
-  "true-false": "True / False",
-  "fill-blank": "Fill in the Blank",
+  "SINGLE_CHOICE": "Single Choice",
+  "MULTIPLE_CHOICE": "Multiple Choice",
+  "TRUE_FALSE": "True / False",
+  "FILL_BLANK": "Fill in the Blank",
 };
 
 export const COLLECTIONS = [
@@ -163,7 +167,6 @@ export interface CreateQuizzRequest {
   title: string;
 }
 export interface QuizzInfoRequest {
-  id: string;
   title: string;
   description?: string;
   imageUrl?: string;

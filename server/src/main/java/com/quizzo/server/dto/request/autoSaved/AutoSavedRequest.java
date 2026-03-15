@@ -7,9 +7,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Builder
 @Getter
-@Setter
 public class AutoSavedRequest {
     private CreateQuestionRequest listCreateQuestion;
     private List<String> deletedQuestionIds;

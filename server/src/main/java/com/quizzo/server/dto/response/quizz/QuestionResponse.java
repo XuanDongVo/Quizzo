@@ -23,10 +23,8 @@ public class QuestionResponse {
     private String imageUrl;
 
     // choice questions
-    private List<UpsertQuestionResponse.AnswerResponse> answers;
-
-    // fill blank
-    private List<UpsertQuestionResponse.FillBlankAnswerResponse> blanks;
+    private List<AnswerResponse> answers;
+    private List<FillBlankAnswerResponse> blanks;
 
     @Builder
     @Getter

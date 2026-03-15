@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auto-saved")
+@RequestMapping("/v1/auto-saved")
 @RequiredArgsConstructor
 public class AutoSavedController {
 

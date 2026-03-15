@@ -11,6 +11,7 @@ import { useGetQuizzByIdQuery } from "../../../../../service/quizz.api";
 import { QuizCreator } from "@/app/(navbar)/(main)/quizz/components/QuizCreator";
 import { mapQuizzResponseToState } from "@/features/quizz/mapper/quizz.mapper";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import useQuizAutosave from "@/features/quizz/create-quizz/useQuizAutosave/useQuizAutosave";
 
 export default function EditQuizPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,17 +20,19 @@ export default function EditQuizPage() {
   const reduxQuiz = useSelector(selectQuizz);
 
   const { data, isLoading, isError } = useGetQuizzByIdQuery(id, {
-    skip: !!reduxQuiz,
+    skip: !!reduxQuiz.id,
   });
 
   useEffect(() => {
-    console.log("Fetched quiz data:", data);
-    if (data?.data && !reduxQuiz) {
+    if (data?.data && !reduxQuiz.id) {
+      console.log("Fetched quiz data from API:", data.data);
       const mapped = mapQuizzResponseToState(data.data);
-      
+      console.log("Fetched quiz data, mapped to state:", mapped);
       dispatch(setQuizz(mapped));
     }
   }, [data, reduxQuiz, dispatch]);
+
+  useQuizAutosave();
 
   if (isLoading) {
     return <LoadingSpinner fullPage />;

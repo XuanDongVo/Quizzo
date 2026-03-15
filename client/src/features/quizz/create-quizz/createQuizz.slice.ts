@@ -75,6 +75,8 @@ export const createQuizSlice = createSlice({
     setField(state, action: PayloadAction<Partial<QuizzData>>) {
       if (!state.quizz) return;
       Object.assign(state.quizz, action.payload);
+      state.quizz.status = "draft";
+      state.isDirty = true;
     },
 
     /**
@@ -89,7 +91,7 @@ export const createQuizSlice = createSlice({
       const order = state.quizz.questions.length;
 
       state.quizz.questions.push(createQuestion(action.payload, order));
-      state.isDirty = true;
+      // state.isDirty = true;
     },
 
     updateQuestion(
@@ -110,7 +112,6 @@ export const createQuizSlice = createSlice({
       Object.assign(q, action.payload.updates);
 
       q.status = getQuestionStatus(q) as "draft" | "complete";
-      state.isDirty = true;
 
       markQuestionDirty(state, q);
     },
@@ -118,10 +119,24 @@ export const createQuizSlice = createSlice({
     deleteQuestion(state, action: PayloadAction<string>) {
       if (!state.quizz) return;
 
+      const question = state.quizz.questions.find(
+        (q) => q.clientTempId === action.payload,
+      );
+
+      if (!question) return;
+
+      if (question.serverId) {
+        state.deletedQuestionIds.push(question.serverId);
+      }
+
       state.quizz.questions = state.quizz.questions.filter(
         (q) => q.clientTempId !== action.payload,
       );
-      state.deletedQuestionIds.push(action.payload);
+
+      if (state.selectedQuestionId === action.payload) {
+        state.selectedQuestionId = null;
+      }
+
       state.isDirty = true;
     },
 
@@ -143,7 +158,6 @@ export const createQuizSlice = createSlice({
       });
 
       questions.forEach((q) => markQuestionDirty(state, q));
-      state.isDirty = true;
     },
 
     /**
@@ -263,6 +277,13 @@ export const createQuizSlice = createSlice({
     setSelectedQuestion(state, action: PayloadAction<string | null>) {
       state.selectedQuestionId = action.payload;
     },
+
+    clearDirty(state){
+      state.dirtyQuestions = {};
+      state.deletedQuestionIds = [];
+      state.isDirty = false;
+      state.quizz.status = "published";
+    }
   },
 });
 
@@ -283,6 +304,7 @@ export const {
   applyServerIds,
   setSelectedQuestion,
   setCurrentStep,
+  clearDirty,
 } = createQuizSlice.actions;
 
 export default createQuizSlice.reducer;

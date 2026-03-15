@@ -16,6 +16,8 @@ public interface QuestionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "quiz", ignore = true)
+    @Mapping(target = "answers", ignore = true)
+    @Mapping(target = "fillBlankAnswers", ignore = true)
     @Mapping(target = "imageUrl", ignore = true)
     Question toEntity (CreateQuestionRequest.QuestionRequest request);
 
@@ -25,17 +27,17 @@ public interface QuestionMapper {
 
 
 
+    // Answer mapping
     @Mapping(source = "id", target = "answerId")
-    UpsertQuestionResponse.AnswerResponse toAnswerResponse(Answer answer);
+    @Mapping(source = "content", target = "content")
+    @Mapping(source = "isCorrect", target = "isCorrect")
+    QuestionResponse.AnswerResponse toAnswerResponse(Answer answer);
+    List<QuestionResponse.AnswerResponse> toAnswerResponses(List<Answer> answers);
 
-//    @Mapping(source = "id", target = "answerId")
-//    @Mapping(source = "answerText", target = "acceptedAnswers")
-//    CreateQuestionResponse.FillBlankAnswerResponse toFillBlankResponse(FillBlankAnswer entity);
-
-
-    List<UpsertQuestionResponse.AnswerResponse> toAnswerResponses(List<Answer> answers);
-
+    // Fill blank mapping
     @Mapping(source = "id", target = "answerId")
     @Mapping(source = "answerText", target = "acceptedAnswers")
-    List<UpsertQuestionResponse.FillBlankAnswerResponse> toFillBlankResponses(List<FillBlankAnswer> blanks);
+    @Mapping(source = "blankIndex", target = "blankIndex")
+    QuestionResponse.FillBlankAnswerResponse toFillBlankResponse(FillBlankAnswer entity);
+    List<QuestionResponse.FillBlankAnswerResponse> toFillBlankResponses(List<FillBlankAnswer> blanks);
 }

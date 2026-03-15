@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,10 +34,14 @@ public class QuestionService {
 
     @Transactional
     public List<UpsertQuestionResponse> upsertQuestion(CreateQuestionRequest questionRequest) {
+
         Quiz quiz = quizzRepository.findById(questionRequest.getQuizId())
                 .orElseThrow(() -> new AppException(ErrorCode.QUIZ_NOT_FOUND));
 
-        return questionRequest.getQuestionRequest().stream().map(qReq -> {
+        List<UpsertQuestionResponse> responses = new ArrayList<>();
+
+        for (CreateQuestionRequest.QuestionRequest qReq : questionRequest.getQuestionRequest()) {
+
             validateQuestionRequest(qReq);
 
             Question question;
@@ -49,7 +54,6 @@ public class QuestionService {
                 question = questionRepository.findById(qReq.getQuestionId())
                         .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
 
-                // update fields
                 question.setContent(qReq.getContent());
                 question.setTimeLimit(qReq.getTimeLimit());
                 question.setScore(qReq.getScore());
@@ -59,35 +63,41 @@ public class QuestionService {
             if (qReq.getUrl() != null) {
                 question.setImageUrl(qReq.getUrl());
             }
+
             question = questionRepository.save(question);
 
-            UpsertQuestionResponse response =
-                    UpsertQuestionResponse.builder()
-                            .clientTempId(isCreate ? qReq.getClientTempId() : null)
-                            .questionId(question.getId()).build();
+            UpsertQuestionResponse response = UpsertQuestionResponse.builder()
+                    .clientTempId(isCreate ? qReq.getClientTempId() : null)
+                    .questionId(question.getId())
+                    .build();
 
             switch (qReq.getQuestionType()) {
-            case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
-                List<UpsertQuestionResponse.AnswerResponse> answerMappings =
-                        upsertChoiceAnswers(question, qReq.getAnswers());
 
-                if (!answerMappings.isEmpty()) {
-                    response.setAnswers(answerMappings);
+                case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
+
+                    List<UpsertQuestionResponse.AnswerResponse> answerMappings =
+                            upsertChoiceAnswers(question, qReq.getAnswers());
+
+                    if (!answerMappings.isEmpty()) {
+                        response.setAnswers(answerMappings);
+                    }
+                }
+
+                case FILL_BLANK -> {
+
+                    List<UpsertQuestionResponse.FillBlankAnswerResponse> blankMappings =
+                            upsertFillBlankAnswers(question, qReq.getBlanks());
+
+                    if (!blankMappings.isEmpty()) {
+                        response.setBlanks(blankMappings);
+                    }
                 }
             }
 
-            case FILL_BLANK -> {
-                List<UpsertQuestionResponse.FillBlankAnswerResponse> blankMappings =
-                        upsertFillBlankAnswers(question, qReq.getBlanks());
-
-                if (!blankMappings.isEmpty()) {
-                    response.setBlanks(blankMappings);
-                }
-            }
+            responses.add(response);
         }
-        return response;
-    }).toList();
 
+        return responses;
     }
 
     public void deleteQuestion(String questionId) {
@@ -98,7 +108,7 @@ public class QuestionService {
     private void validateQuestionRequest(CreateQuestionRequest.QuestionRequest q) {
         switch (q.getQuestionType()) {
 
-            case SINGLE_CHOICE, MULTIPLE_CHOICE -> {
+            case SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE -> {
                 if (q.getAnswers() == null || q.getAnswers().isEmpty()) {
                     throw new AppException(ErrorCode.INVALID_QUESTION_FORMAT);
                 }
@@ -124,18 +134,20 @@ public class QuestionService {
 
             if (isCreate) {
                 answer = new Answer();
-                answer.setQuestion(question);
             } else {
                 answer = answerRepository.findById(a.getAnswerId()).orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
             }
+            answer.setQuestion(question);
+
 
             answer.setContent(a.getContent());
             answer.setIsCorrect(Boolean.TRUE.equals(a.getIsCorrect()));
 
             answer = answerRepository.save(answer);
+
             if (isCreate) {
                 return UpsertQuestionResponse.AnswerResponse.builder()
-                        .clientTempId(a.getAnswerId())
+                        .clientTempId(a.getClientTempId())
                         .answerId(answer.getId())
                         .build();
             }
@@ -157,12 +169,12 @@ public class QuestionService {
 
             if (isCreate) {
                 entity = new FillBlankAnswer();
-                entity.setQuestion(question);
+
             } else {
                 entity = fillBlankAnswerRepository.findById(b.getAnswerId())
                         .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
             }
-
+            entity.setQuestion(question);
             entity.setBlankIndex(b.getBlankIndex());
             entity.setAnswerText(b.getAcceptedAnswers().trim());
 
@@ -171,7 +183,7 @@ public class QuestionService {
 
             if (isCreate) {
                 return UpsertQuestionResponse.FillBlankAnswerResponse.builder()
-                        .clientTempId(b.getAnswerId())
+                        .clientTempId(b.getClientTempId())
                         .answerId(entity.getId())
                         .build();
             }

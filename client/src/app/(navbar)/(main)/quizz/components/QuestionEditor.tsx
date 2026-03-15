@@ -1,6 +1,6 @@
 "use client";
 
-import { QUESTION_TYPE_LABELS } from "@/types/quiz/quiz-types";
+import { QUESTION_TYPE_LABELS, QUESTION_TYPES } from "@/types/quiz/quiz-types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -165,7 +165,7 @@ export function QuestionEditor() {
         >
           Question
         </Label>
-        {question.questionType === "fill-blank" ? (
+        {question.questionType === QUESTION_TYPES.FILL_BLANK ? (
           <div className="flex flex-col gap-1">
             <Textarea
               id="question-text"
@@ -206,12 +206,12 @@ export function QuestionEditor() {
       {/* Answer options */}
       <div className="flex flex-col gap-3">
         <Label className="text-sm font-semibold text-foreground">
-          {question.questionType === "fill-blank"
+          {question.questionType === QUESTION_TYPES.FILL_BLANK
             ? "Correct Answer"
             : "Answer Options"}
         </Label>
 
-        {question.questionType === "fill-blank" ? (
+        {question.questionType === QUESTION_TYPES.FILL_BLANK ? (
           <Input
             placeholder="Type the correct answer..."
             value={question.blanks?.[0]?.acceptedAnswers || ""}
@@ -238,7 +238,8 @@ export function QuestionEditor() {
           <div className="grid grid-cols-1 gap-3">
             {question.answers?.map((option, optIndex) => (
               <div
-                key={option.clientTempId}
+              
+                key={option?.clientTempId ?? option.serverId}
                 className={cn(
                   "relative flex items-center gap-3 rounded-xl p-3 md:p-4 transition-all",
                   ANSWER_COLORS[optIndex % 4],
@@ -253,11 +254,10 @@ export function QuestionEditor() {
                   placeholder={`Option ${ANSWER_LABELS[optIndex]}`}
                   value={option.content}
                   onChange={(e) => {
-                    console.log(e.target.value),
                     dispatch(
                       updateOption({
                         questionId: question.clientTempId!,
-                        optionId: option.clientTempId!,
+                        optionId: option.clientTempId ?? option.serverId,
                         content: e.target.value,
                       }),
                     );
@@ -271,7 +271,7 @@ export function QuestionEditor() {
                     dispatch(
                       setCorrectAnswer({
                         questionId: question.clientTempId!,
-                        optionId: option.clientTempId!,
+                        optionId: option.clientTempId ?? option.serverId,
                       }),
                     )
                   }

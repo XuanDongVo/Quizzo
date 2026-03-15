@@ -1,11 +1,52 @@
 import { useDispatch, useSelector } from "react-redux";
 import { selectCreateQuizState } from "../createQuizz.selectors";
 import { useEffect, useRef, useMemo } from "react";
-import debounce from "lodash/debounce";
+// import debounce from "lodash.debounce";
 import { useAutoSavedMutation } from "@/service/auto-saved.api";
 import { toastError } from "@/lib/toast";
 import { mapQuestionToRequest } from "../../mapper/question.mapper";
-import { applyServerIds } from "../createQuizz.slice";
+import { mapQuizzInfoToRequest } from "../../mapper/quizz.mapper";
+import { applyServerIds, clearDirty } from "../createQuizz.slice";
+import { useUpdateQuizzMutation } from "@/service/quizz.api";
+
+type DebouncedFunction<T extends (...args: any[]) => void> = {
+  (...args: Parameters<T>): void;
+  cancel: () => void;
+  flush: () => void;
+};
+
+function debounce<T extends (...args: any[]) => void>(
+  fn: T,
+  delay: number,
+): DebouncedFunction<T> {
+  let timer: NodeJS.Timeout | null = null;
+
+  const debounced = (...args: Parameters<T>) => {
+    if (timer) clearTimeout(timer);
+
+    timer = setTimeout(() => {
+      fn(...args);
+      timer = null;
+    }, delay);
+  };
+
+  debounced.cancel = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  debounced.flush = () => {
+    if (timer) {
+      clearTimeout(timer);
+      fn();
+      timer = null;
+    }
+  };
+
+  return debounced as DebouncedFunction<T>;
+}
 
 export default function useQuizAutosave() {
   const dispatch = useDispatch();
@@ -14,30 +55,38 @@ export default function useQuizAutosave() {
   );
 
   const [autoSaved, { isLoading, isSuccess, isError }] = useAutoSavedMutation();
+  const [updateQuizz, { isLoading: isUpdating }] = useUpdateQuizzMutation();
 
   const savingRef = useRef(false);
 
   const saveDraft = async () => {
     if (savingRef.current) return;
-    if (!quizz || !isDirty) return;
+    if (!quizz) return;
 
     savingRef.current = true;
 
     try {
-      if (quizz.status === "published") {
+      if (quizz.status === "draft") {
+        await updateQuizz({
+          quizzId: quizz.id,
+          quizzInfoRequest: mapQuizzInfoToRequest(quizz),
+        });
       }
 
-      const payload = await autoSaved({
-        listCreateQuestion: {
-          quizId: quizz.id,
-          questionRequest:
-            Object.values(dirtyQuestions).map(mapQuestionToRequest),
-        },
-        deletedQuestionIds: deletedQuestionIds,
-      }).unwrap();
+      if (!isDirty) {
+        const payload = await autoSaved({
+          listCreateQuestion: {
+            quizId: quizz.id,
+            questionRequest:
+              Object.values(dirtyQuestions).map(mapQuestionToRequest),
+          },
+          deletedQuestionIds: deletedQuestionIds,
+        }).unwrap();
 
-     dispatch(applyServerIds(payload.data));
+        dispatch(applyServerIds(payload.data));
+      }
 
+      dispatch(clearDirty());
     } catch (err) {
       toastError("Failed to auto-save quiz");
     }

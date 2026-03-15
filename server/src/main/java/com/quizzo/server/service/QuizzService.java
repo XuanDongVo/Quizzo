@@ -100,11 +100,16 @@ public class QuizzService {
     }
 
     private Collection handleCollectionChange(Quiz quiz, String collectionId) {
+
+        if (collectionId != null && collectionId.isBlank()) {
+            collectionId = null;
+        }
+
         CollectionQuiz current = collectionQuizzRepository
                 .findByQuiz_Id(quiz.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
+                .orElse(null);
 
-        // Case: client want to remove collection
+        // Case 1: client không chọn collection
         if (collectionId == null) {
             if (current != null) {
                 collectionQuizzRepository.delete(current);
@@ -112,13 +117,23 @@ public class QuizzService {
             return null;
         }
 
-        // Find new collection
+        // Tìm collection có sẵn
         Collection newCollection = collectionRepository
                 .findById(collectionId)
                 .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN));
 
-        // Case: change collection
-        if (!current.getCollection().getId().equals(newCollection.getId())) {
+        // Case 2: trước đó chưa có relation -> tạo relation
+        if (current == null) {
+            CollectionQuiz relation = new CollectionQuiz();
+            relation.setQuiz(quiz);
+            relation.setCollection(newCollection);
+            collectionQuizzRepository.save(relation);
+
+            return newCollection;
+        }
+
+        // Case 3: đã có nhưng khác -> update
+        if (!current.getCollection().getId().equals(collectionId)) {
             current.setCollection(newCollection);
             collectionQuizzRepository.save(current);
         }

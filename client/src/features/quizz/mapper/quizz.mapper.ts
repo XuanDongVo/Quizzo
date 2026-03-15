@@ -1,18 +1,22 @@
-import { QuestionStatus, QuestionType, QuizzData, QuizzInfoRequest, QuizzInfoResponse, QuizzResponse } from "@/types/quiz/quiz-types";
+import {
+  QuestionStatus,
+  QuestionType,
+  QuizzData,
+  QuizzInfoRequest,
+  QuizzInfoResponse,
+  QuizzResponse,
+} from "@/types/quiz/quiz-types";
 
-
-export function mapQuizzInfoResponseToState(
-  res: QuizzInfoResponse
-): QuizzData {
+export function mapQuizzInfoResponseToState(res: QuizzInfoResponse): QuizzData {
   return {
     id: res.quizzId,
     title: res.title ?? "",
     description: res.description ?? "",
     coverImageUrl: res.imageUrl ?? "",
-    collectionResponse: {
-      id: res.collectionResponse?.id ?? "",
-      name: res.collectionResponse?.name ?? "",
-    },
+    collectionResponse:
+      res.collectionResponse && res.collectionResponse.id
+        ? res.collectionResponse
+        : undefined,
     isPublic: res.visibilityQuiz ?? true,
     isPublicQuestion: res.visibilityQuestion ?? true,
     shuffleQuestions: res.shuffle ?? false,
@@ -20,6 +24,19 @@ export function mapQuizzInfoResponseToState(
 
     questions: [],
     passingScore: 70,
+  };
+}
+
+export function mapQuizzInfoToRequest(quizz: QuizzData): QuizzInfoRequest {
+  return {
+    title: quizz.title,
+    description: quizz.description,
+    imageUrl: quizz.coverImageUrl,
+    collectionId: quizz.collectionResponse?.id || undefined,
+    visibilityQuiz: quizz.isPublic,
+    visibilityQuestion: quizz.isPublicQuestion,
+    shuffle: quizz.shuffleQuestions,
+    showResults: quizz.showResults,
   };
 }
 
@@ -44,7 +61,7 @@ export function mapQuizzResponseToState(res: QuizzResponse): QuizzData {
 
     questions:
       res.questions?.map((q, index) => ({
-        clientTempId: q.questionId, 
+        clientTempId: q.questionId,
         serverId: q.questionId,
 
         questionType: q.questionType as QuestionType,
@@ -58,24 +75,22 @@ export function mapQuizzResponseToState(res: QuizzResponse): QuizzData {
         imageUrl: q.imageUrl,
 
         answers: q.answers?.map((a) => ({
-          clientTempId: a.answerId, 
+          clientTempId: a.answerId,
           serverId: a.answerId,
           content: a.content,
           isCorrect: a.isCorrect,
         })),
 
         blanks: q.blanks?.map((b) => ({
-          clientTempId: b.answerId, 
+          clientTempId: b.answerId,
           serverId: b.answerId,
           blankIndex: b.blankIndex,
           acceptedAnswers: b.acceptedAnswers,
         })),
 
-         status: "published" as QuestionStatus ,
+        status: "complete" as QuestionStatus,
       })) ?? [],
 
     status: "published",
   };
 }
-     
-

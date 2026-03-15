@@ -29,17 +29,17 @@ import { useCallback, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 const TYPE_ICONS: Record<QuestionType, typeof CheckCircle2> = {
-  "single-choice": CheckCircle2,
-  "multiple-choice": CopyCheck,
-  "true-false": ToggleLeft,
-  "fill-blank": Type,
+  "SINGLE_CHOICE": CheckCircle2,
+  "MULTIPLE_CHOICE": CopyCheck,
+  "TRUE_FALSE": ToggleLeft,
+  "FILL_BLANK": Type,
 }
 
 const TYPE_COLORS: Record<QuestionType, string> = {
-  "single-choice": "bg-primary/10 text-primary border-primary/20",
-  "multiple-choice": "bg-primary/10 text-primary border-primary/20",
-  "true-false": "bg-answer-b/10 text-answer-b border-answer-b/20",
-  "fill-blank": "bg-accent/10 text-accent border-accent/20",
+  "SINGLE_CHOICE": "bg-primary/10 text-primary border-primary/20",
+  "MULTIPLE_CHOICE": "bg-primary/10 text-primary border-primary/20",
+  "TRUE_FALSE": "bg-answer-b/10 text-answer-b border-answer-b/20",
+  "FILL_BLANK": "bg-accent/10 text-accent border-accent/20",
 }
 
 const STATUS_STYLES: Record<QuestionStatus, {
@@ -191,9 +191,9 @@ export function QuestionBuilder() {
                   onClick={(e) => {
                     e.stopPropagation()
                     dispatch(deleteQuestion(question.clientTempId))
-                    if (selectedQuestionId === question.clientTempId) {
-                      dispatch(setSelectedQuestion(null))
-                    }
+                    // if (selectedQuestionId === question.clientTempId) {
+                    //   dispatch(setSelectedQuestion(null))
+                    // }
                   }}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive md:bg-destructive/10"
                   aria-label={`Delete question ${index + 1}`}
