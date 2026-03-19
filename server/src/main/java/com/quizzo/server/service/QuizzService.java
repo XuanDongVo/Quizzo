@@ -2,12 +2,10 @@ package com.quizzo.server.service;
 
 import com.quizzo.server.dto.request.quizz.CreateQuizzRequest;
 import com.quizzo.server.dto.request.quizz.QuizzInfoRequest;
+import com.quizzo.server.dto.response.quizz.QuestionResponse;
 import com.quizzo.server.dto.response.quizz.QuizzInfoResponse;
 import com.quizzo.server.dto.response.quizz.QuizzResponse;
-import com.quizzo.server.entity.Collection;
-import com.quizzo.server.entity.CollectionQuiz;
-import com.quizzo.server.entity.Quiz;
-import com.quizzo.server.entity.User;
+import com.quizzo.server.entity.*;
 import com.quizzo.server.exception.AppException;
 import com.quizzo.server.exception.ErrorCode;
 import com.quizzo.server.mapper.QuestionMapper;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 
 @Service
@@ -53,7 +52,9 @@ public class QuizzService {
 
 //        Collection collection = quiz.();
 
-        return quizzMapper.toQuizzResponse(quiz, null);
+        QuizzResponse quizzResponse =  quizzMapper.toQuizzResponse(quiz, null);
+        quizzResponse.getQuestions().sort(Comparator.comparing(QuestionResponse::getOrderIndex));
+        return quizzResponse;
     }
 
     @Transactional

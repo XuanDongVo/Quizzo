@@ -90,7 +90,7 @@ export function createQuestion(
   };
 
   switch (type) {
-    case "SINGLE_CHOICE":
+    case QUESTION_TYPES.SINGLE_CHOICE:
       return {
         ...base,
         answers: [
@@ -101,18 +101,18 @@ export function createQuestion(
         ],
       };
 
-    case "MULTIPLE_CHOICE":
+    case QUESTION_TYPES.MULTIPLE_CHOICE:
       return {
         ...base,
         answers: [
-          { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
+          { clientTempId: crypto.randomUUID(), content: "", isCorrect: true },
           { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
           { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
           { clientTempId: crypto.randomUUID(), content: "", isCorrect: false },
         ],
       };
 
-    case "TRUE_FALSE":
+    case QUESTION_TYPES.TRUE_FALSE:
       return {
         ...base,
         answers: [
@@ -129,7 +129,7 @@ export function createQuestion(
         ],
       };
 
-    case "FILL_BLANK":
+    case QUESTION_TYPES.FILL_BLANK:
       return {
         ...base,
         blanks: [
@@ -144,10 +144,10 @@ export function createQuestion(
 }
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  "SINGLE_CHOICE": "Single Choice",
-  "MULTIPLE_CHOICE": "Multiple Choice",
-  "TRUE_FALSE": "True / False",
-  "FILL_BLANK": "Fill in the Blank",
+  [QUESTION_TYPES.SINGLE_CHOICE]: "Single Choice",
+  [QUESTION_TYPES.MULTIPLE_CHOICE]: "Multiple Choice",
+  [QUESTION_TYPES.TRUE_FALSE]: "True / False",
+  [QUESTION_TYPES.FILL_BLANK]: "Fill in the Blank",
 };
 
 export const COLLECTIONS = [

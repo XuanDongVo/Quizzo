@@ -22,4 +22,4 @@ public class FillBlankAnswer {
 
     @Column(nullable = false)
     private String answerText;
-}
+}   

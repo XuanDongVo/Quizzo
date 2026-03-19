@@ -48,6 +48,19 @@ const markQuestionDirty = (state: CreateQuizState, question: Question) => {
   state.isDirty = true;
 };
 
+const setSingleAnswer = (question: Question, optionId: string) => {
+  question.answers?.forEach(a => {
+    a.isCorrect = (a.clientTempId ?? a.serverId) === optionId;
+  });
+};
+
+const toggleMultipleAnswer = (question: Question, optionId: string) => {
+  const ans = question.answers?.find(
+    a => (a.clientTempId ?? a.serverId) === optionId
+  );
+  if (ans) ans.isCorrect = !ans.isCorrect;
+};
+
 export const createQuizSlice = createSlice({
   name: "createQuiz",
   initialState,
@@ -182,9 +195,11 @@ export const createQuizSlice = createSlice({
 
       if (!question) return;
 
-      question.answers?.forEach((option) => {
-        option.isCorrect = option.clientTempId === action.payload.optionId;
-      });
+      if (question.questionType === "MULTIPLE_CHOICE") {
+        toggleMultipleAnswer(question, action.payload.optionId);
+      } else {
+        setSingleAnswer(question, action.payload.optionId);
+      }
 
       question.status = getQuestionStatus(question) as "draft" | "complete";
 
@@ -278,12 +293,12 @@ export const createQuizSlice = createSlice({
       state.selectedQuestionId = action.payload;
     },
 
-    clearDirty(state){
+    clearDirty(state) {
       state.dirtyQuestions = {};
       state.deletedQuestionIds = [];
       state.isDirty = false;
       state.quizz.status = "published";
-    }
+    },
   },
 });
 

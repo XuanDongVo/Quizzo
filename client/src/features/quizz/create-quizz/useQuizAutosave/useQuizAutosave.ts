@@ -64,7 +64,6 @@ export default function useQuizAutosave() {
     if (!quizz) return;
 
     savingRef.current = true;
-
     try {
       if (quizz.status === "draft") {
         await updateQuizz({
@@ -73,7 +72,7 @@ export default function useQuizAutosave() {
         });
       }
 
-      if (!isDirty) {
+      if (isDirty) {
         const payload = await autoSaved({
           listCreateQuestion: {
             quizId: quizz.id,
