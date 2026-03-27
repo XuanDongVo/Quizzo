@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { QUESTION_TYPE_LABELS, QuizzData } from "@/types/quiz/quiz-types"
+import { useMemo, useState } from "react"
+import { QUESTION_TYPE_LABELS, QUESTION_TYPES, QuizzData } from "@/types/quiz/quiz-types"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -23,6 +23,27 @@ const PREVIEW_ANSWER_COLORS = [
 
 const ANSWER_LABELS = ["A", "B", "C", "D"]
 
+type FillBlankToken =
+  | { type: "text"; value: string }
+  | { type: "blank"; blankIndex: number }
+
+const parseFillBlankTokens = (content: string): FillBlankToken[] => {
+  const parts = content.split("___")
+  const tokens: FillBlankToken[] = []
+
+  parts.forEach((part, index) => {
+    if (part) {
+      tokens.push({ type: "text", value: part })
+    }
+
+    if (index < parts.length - 1) {
+      tokens.push({ type: "blank", blankIndex: index })
+    }
+  })
+
+  return tokens
+}
+
 export function QuizPreview({ quizz }: { quizz: QuizzData }) {
   const [previewIndex, setPreviewIndex] = useState(0)
 
@@ -42,6 +63,13 @@ export function QuizPreview({ quizz }: { quizz: QuizzData }) {
 
   const question = quizz.questions[previewIndex]
   const totalPoints = quizz.questions.reduce((sum, q) => sum + q.score, 0)
+  const fillBlankTokens = useMemo(
+    () =>
+      question.questionType === QUESTION_TYPES.FILL_BLANK
+        ? parseFillBlankTokens(question.content)
+        : [],
+    [question.content, question.questionType],
+  )
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -64,11 +92,6 @@ export function QuizPreview({ quizz }: { quizz: QuizzData }) {
             <p className="text-sm text-muted-foreground mt-1 text-pretty">{quizz.description}</p>
           )}
           <div className="flex flex-wrap items-center gap-3 mt-3">
-            {quizz.collectionResponse && (
-              <span className="inline-flex items-center rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                {quizz.collectionResponse.name}
-              </span>
-            )}
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Trophy className="h-3.5 w-3.5" />
               {totalPoints} points
@@ -125,11 +148,56 @@ export function QuizPreview({ quizz }: { quizz: QuizzData }) {
           </h3>
 
           {/* Answer options preview */}
-          {question.questionType === "fill-blank" ? (
-            <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                Answer: <span className="font-semibold text-foreground">{question.blanks?.[0]?.acceptedAnswers || "___"}</span>
+          {question.questionType === QUESTION_TYPES.FILL_BLANK ? (
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-b from-muted/30 to-card p-4 md:p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Fill in the blank preview
               </p>
+              <div className="mt-3 rounded-xl border border-border/70 bg-background/80 p-3 md:p-4">
+                <div className="flex flex-wrap items-center gap-2 text-sm leading-relaxed md:text-base">
+                  {fillBlankTokens.length ? (
+                    fillBlankTokens.map((token, idx) =>
+                      token.type === "text" ? (
+                        <span key={idx} className="text-foreground/90">
+                          {token.value}
+                        </span>
+                      ) : (
+                        <span
+                          key={idx}
+                          className="inline-flex min-h-8 min-w-[84px] items-center justify-center rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-center text-sm font-semibold text-primary"
+                        >
+                          {question.blanks?.[token.blankIndex]?.acceptedAnswers || "___"}
+                        </span>
+                      ),
+                    )
+                  ) : (
+                    <span className="text-muted-foreground">No blank tokens yet. Add ___ in question text.</span>
+                  )}
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Accepted answers
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                {question.blanks?.length ? (
+                  question.blanks.map((blank, blankIndex) => (
+                    <div
+                      key={blank.clientTempId || blankIndex}
+                      className="flex items-center gap-2 rounded-xl border border-border/70 bg-background px-3 py-2.5"
+                    >
+                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-primary/10 px-1 text-xs font-semibold text-primary">
+                        {blankIndex + 1}
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        {blank.acceptedAnswers || "___"}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground">No blank answers yet</span>
+                )}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -160,25 +228,25 @@ export function QuizPreview({ quizz }: { quizz: QuizzData }) {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 p-3 md:p-4">
         <Button
           variant="outline"
           onClick={() => setPreviewIndex((i) => Math.max(0, i - 1))}
           disabled={previewIndex === 0}
-          className="rounded-xl"
+                  className="min-w-24 rounded-xl"
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Previous
         </Button>
-        <div className="flex gap-1.5">
+                <div className="flex items-center gap-2">
           {quizz.questions.map((_, i) => (
             <button
               key={quizz.questions[i].clientTempId}
               type="button"
               onClick={() => setPreviewIndex(i)}
               className={cn(
-                "h-2 rounded-full transition-all",
-                i === previewIndex ? "w-6 bg-primary" : "w-2 bg-border hover:bg-primary/30"
+                        "h-2.5 rounded-full transition-all",
+                        i === previewIndex ? "w-7 bg-primary" : "w-2.5 bg-border hover:bg-primary/30"
               )}
               aria-label={`Go to question ${i + 1}`}
             />
@@ -188,7 +256,7 @@ export function QuizPreview({ quizz }: { quizz: QuizzData }) {
           variant="outline"
           onClick={() => setPreviewIndex((i) => Math.min(quizz.questions.length - 1, i + 1))}
           disabled={previewIndex === quizz.questions.length - 1}
-          className="rounded-xl"
+          className="min-w-24 rounded-xl"
         >
           Next
           <ChevronRight className="h-4 w-4 ml-1" />

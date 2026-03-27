@@ -1,15 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Globe, Shuffle, BarChart3, Target } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setField } from "@/features/quizz/create-quizz/createQuizz.slice";
 import { QuizzData } from "@/types/quiz/quiz-types";
 
 export function QuizSettings({ quizz }: { quizz: QuizzData }) {
   const dispatch = useDispatch();
+  const [passingScoreDraft, setPassingScoreDraft] = useState(quizz.passingScore);
+
+  useEffect(() => {
+    setPassingScoreDraft(quizz.passingScore);
+  }, [quizz.passingScore]);
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
@@ -101,12 +107,13 @@ export function QuizSettings({ quizz }: { quizz: QuizzData }) {
               </p>
             </div>
             <span className="text-lg font-bold text-primary">
-              {quizz.passingScore}%
+              {passingScoreDraft}%
             </span>
           </div>
           <Slider
-            value={[quizz.passingScore]}
-            onValueChange={([v]) => dispatch(setField({ passingScore: v }))}
+            value={[passingScoreDraft]}
+            onValueChange={([v]) => setPassingScoreDraft(v)}
+            onValueCommit={([v]) => dispatch(setField({ passingScore: v }))}
             min={0}
             max={100}
             step={5}

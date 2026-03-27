@@ -14,5 +14,6 @@ public class QuizzInfoRequest {
     private boolean visibilityQuestion;
     private boolean shuffle;
     private boolean showResults;
+    private Integer passingScore;
 
 }

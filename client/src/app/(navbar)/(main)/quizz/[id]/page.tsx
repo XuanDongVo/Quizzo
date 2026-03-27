@@ -25,9 +25,7 @@ export default function EditQuizPage() {
 
   useEffect(() => {
     if (data?.data && !reduxQuiz.id) {
-      console.log("Fetched quiz data from API:", data.data);
       const mapped = mapQuizzResponseToState(data.data);
-      console.log("Fetched quiz data, mapped to state:", mapped);
       dispatch(setQuizz(mapped));
     }
   }, [data, reduxQuiz, dispatch]);

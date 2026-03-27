@@ -32,6 +32,7 @@ public class Quiz extends BaseEntity {
     private Boolean visibilityQuestion;
     private Boolean shuffle;
     private Boolean showResults;
+    private Integer passingScore;
 
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)

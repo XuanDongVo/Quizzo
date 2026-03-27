@@ -10,7 +10,12 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "collections")
+@Table(
+        name = "collections",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "name"})
+        }
+)
 public class Collection {
 
     @Id
@@ -20,16 +25,12 @@ public class Collection {
     @Column(nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CollectionType type;
-
-    private boolean visibility;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(nullable = false)
+    private boolean visibility;
 
     private Instant createdAt;
 }
-

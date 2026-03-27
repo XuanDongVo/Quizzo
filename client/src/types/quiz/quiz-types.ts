@@ -49,7 +49,6 @@ export interface QuizzData {
   title: string;
   description: string;
   coverImageUrl: string;
-  collectionResponse?: CollectionResponse;
   questions: Question[];
   isPublic: boolean;
   shuffleQuestions: boolean;
@@ -64,7 +63,6 @@ export const DEFAULT_QUIZZ: QuizzData = {
   title: "",
   description: "",
   coverImageUrl: "",
-  collectionResponse: undefined,
   questions: [],
   isPublic: true,
   shuffleQuestions: false,
@@ -175,6 +173,7 @@ export interface QuizzInfoRequest {
   visibilityQuestion: boolean;
   shuffle: boolean;
   showResults: boolean;
+  passingScore: number;
 }
 export interface QuizzInfoResponse {
   quizzId: string;
@@ -186,6 +185,7 @@ export interface QuizzInfoResponse {
   visibilityQuestion: boolean;
   shuffle: boolean;
   showResults: boolean;
+  passingScore: number;
 }
 
 export interface  QuizzResponse {

@@ -17,7 +17,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -31,6 +30,7 @@ public class QuizzService {
     private final QuizzMapper quizzMapper;
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
+    private final CollectionService collectionService;
 
     private User getCurrentUser() {
         Jwt jwt = JwtUtils.getCurrentJwt().orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
@@ -50,9 +50,9 @@ public class QuizzService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-//        Collection collection = quiz.();
 
-        QuizzResponse quizzResponse =  quizzMapper.toQuizzResponse(quiz, null);
+
+        QuizzResponse quizzResponse = quizzMapper.toQuizzResponse(quiz);
         quizzResponse.getQuestions().sort(Comparator.comparing(QuestionResponse::getOrderIndex));
         return quizzResponse;
     }
@@ -71,7 +71,7 @@ public class QuizzService {
         quiz.setCreator(creator);
         quiz = quizzRepository.save(quiz);
 
-        return quizzMapper.toQuizzInfoResponse(quiz, null);
+        return quizzMapper.toQuizzInfoResponse(quiz);
     }
 
     @Transactional
@@ -85,11 +85,11 @@ public class QuizzService {
         quizzMapper.updateEntityFromRequest(request, quiz);
 
         // Handle collection change
-        Collection collection = handleCollectionChange(quiz, request.getCollectionId());
+//        Collection collection = handleCollectionChange(quiz, request.getCollectionId());
 
         quiz = quizzRepository.save(quiz);
 
-        return quizzMapper.toQuizzInfoResponse(quiz, collection);
+        return quizzMapper.toQuizzInfoResponse(quiz);
     }
 
     public void deleteQuizz(String quizzId) {

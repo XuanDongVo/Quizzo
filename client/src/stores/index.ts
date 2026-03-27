@@ -5,6 +5,7 @@ import createQuizSlice from "../features/quizz/create-quizz/createQuizz.slice";
 import { quizzApi } from "../service/quizz.api";
 import { questionApi } from "../service/question.api";
 import { autoSavedApi } from "../service/auto-saved.api";
+import { collectionApi } from "@/service/collection.api";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     [quizzApi.reducerPath]: quizzApi.reducer,
     [questionApi.reducerPath]: questionApi.reducer,
     [autoSavedApi.reducerPath]: autoSavedApi.reducer,
+    [collectionApi.reducerPath]: collectionApi.reducer,
     signup: signupReducer,
     createQuizz: createQuizSlice,
   },
@@ -20,7 +22,8 @@ export const store = configureStore({
       authApi.middleware,
       quizzApi.middleware,
       questionApi.middleware,
-      autoSavedApi.middleware
+      autoSavedApi.middleware,
+      collectionApi.middleware
     ),
 });
 

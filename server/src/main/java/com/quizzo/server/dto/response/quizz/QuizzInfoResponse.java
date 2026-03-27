@@ -1,5 +1,6 @@
 package com.quizzo.server.dto.response.quizz;
 
+import com.quizzo.server.dto.response.collection.AvailableCollectionsResponse;
 import com.quizzo.server.dto.response.collection.CollectionResponse;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,9 +14,9 @@ public class QuizzInfoResponse {
     private String title;
     private String description;
     private String imageUrl;
-    private CollectionResponse collectionResponse;
     private Boolean visibilityQuiz;
     private Boolean visibilityQuestion;
     private Boolean shuffle;
     private Boolean showResults;
+    private Integer passingScore;
 }

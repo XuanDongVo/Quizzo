@@ -13,17 +13,13 @@ export function mapQuizzInfoResponseToState(res: QuizzInfoResponse): QuizzData {
     title: res.title ?? "",
     description: res.description ?? "",
     coverImageUrl: res.imageUrl ?? "",
-    collectionResponse:
-      res.collectionResponse && res.collectionResponse.id
-        ? res.collectionResponse
-        : undefined,
     isPublic: res.visibilityQuiz ?? true,
     isPublicQuestion: res.visibilityQuestion ?? true,
     shuffleQuestions: res.shuffle ?? false,
     showResults: res.showResults ?? true,
 
     questions: [],
-    passingScore: 70,
+    passingScore: res.passingScore ?? 70,
   };
 }
 
@@ -32,11 +28,11 @@ export function mapQuizzInfoToRequest(quizz: QuizzData): QuizzInfoRequest {
     title: quizz.title,
     description: quizz.description,
     imageUrl: quizz.coverImageUrl,
-    collectionId: quizz.collectionResponse?.id || undefined,
     visibilityQuiz: quizz.isPublic,
     visibilityQuestion: quizz.isPublicQuestion,
     shuffle: quizz.shuffleQuestions,
     showResults: quizz.showResults,
+    passingScore: quizz.passingScore,
   };
 }
 
@@ -47,17 +43,12 @@ export function mapQuizzResponseToState(res: QuizzResponse): QuizzData {
     description: res.quizzInfoResponse?.description || "",
     coverImageUrl: res.quizzInfoResponse?.imageUrl || "",
 
-    collectionResponse: {
-      id: res.quizzInfoResponse.collectionResponse?.id ?? "",
-      name: res.quizzInfoResponse.collectionResponse?.name ?? "",
-    },
-
     isPublic: res.quizzInfoResponse.visibilityQuiz ?? true,
     isPublicQuestion: res.quizzInfoResponse.visibilityQuestion ?? true,
     shuffleQuestions: res.quizzInfoResponse.shuffle ?? false,
     showResults: res.quizzInfoResponse.showResults ?? true,
 
-    passingScore: 70,
+    passingScore: res.quizzInfoResponse.passingScore ?? 70,
 
     questions:
       res.questions?.map((q, index) => ({

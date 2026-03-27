@@ -6,6 +6,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CollectionMapper {
-
     CollectionResponse toResponse (Collection collection);
 }

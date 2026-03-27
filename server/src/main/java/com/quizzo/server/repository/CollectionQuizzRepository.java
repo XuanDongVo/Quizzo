@@ -10,4 +10,7 @@ public interface CollectionQuizzRepository extends JpaRepository<CollectionQuiz,
 
     Optional<CollectionQuiz> findByQuiz_Id(String quizId);
 
+    boolean existsByCollectionIdAndQuizId(String collectionId, String quizId);
+
+    void deleteByCollectionIdAndQuizId(String collectionId, String quizId);
 }
